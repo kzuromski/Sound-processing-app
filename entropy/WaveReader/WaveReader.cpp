@@ -154,5 +154,5 @@ public:
 
 void main()
 {
-	WaveReader wave("gun.wav");
+	WaveReader wave("sample.wav");
 }

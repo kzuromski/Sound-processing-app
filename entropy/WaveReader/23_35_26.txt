@@ -1,0 +1,7 @@
+sample1.wav
+Size of data: 1093280
+Ammount of samples: 273320
+First calculation of left side: 729.277
+First calculation of right side: 729.133
+Second calculation of left side: 0.491768
+Second calculation of right side: 0.271557
