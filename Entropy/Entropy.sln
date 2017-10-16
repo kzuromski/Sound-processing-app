@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Entropy", "Entropy\Entropy.vcxproj", "{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Debug|x64.ActiveCfg = Debug|x64
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Debug|x64.Build.0 = Debug|x64
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Debug|x86.ActiveCfg = Debug|Win32
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Debug|x86.Build.0 = Debug|Win32
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Release|x64.ActiveCfg = Release|x64
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Release|x64.Build.0 = Release|x64
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Release|x86.ActiveCfg = Release|Win32
+		{CFDE620A-A0C1-4599-AF6D-C63F654A10DE}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
