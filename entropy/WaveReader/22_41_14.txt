@@ -1,0 +1,5 @@
+gun.wav
+Size of data: 1249048
+Ammount of samples: 312262
+First calculation of left side: 379.076
+First calculation of right side: 379.106

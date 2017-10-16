@@ -1,0 +1,3 @@
+gun.wav
+Size of data: 1249048
+Ammount of samples: 312262
