@@ -1,0 +1,2 @@
+Nazwa	Œrednia kwadratowa X	Œrednia kwadratowa E	Entropia X	Entropia E
+gun.wav	0	0
