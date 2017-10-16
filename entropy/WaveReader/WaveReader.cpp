@@ -32,7 +32,9 @@ private:
 	DWORD size_of_data; // size of data chunk
 	INT16 data_of_file;
 	vector<INT16> left;
+	vector<INT16> left_minus;
 	vector<INT16> right;
+	vector<INT16> right_minus;
 	ofstream new_file;
 	FILE *wf;
 	double ammount_of_samples;
@@ -48,7 +50,6 @@ public:
 			cout << "File is not opened" << endl;
 			exit(-1);
 		}
-
 		SYSTEMTIME time;
 		GetLocalTime(&time);
 		string file_name;
@@ -56,13 +57,18 @@ public:
 		ReadData();
 
 		ofstream new_file(file_name + ".txt");
-		double ammount_of_samples = size_of_data / 4;
+		ammount_of_samples = size_of_data / 4;
+
 		new_file << name_of_wave << endl;
 		new_file << "Size of data: " << size_of_data << endl;
 		new_file << "Ammount of samples: " << ammount_of_samples << endl;
-		calculations();
-		new_file << "First calculation of left side: " << first_calculation(ammount_of_samples / 2, left) << endl;
-		new_file << "First calculation of right side: " << first_calculation(ammount_of_samples / 2, right) << endl;
+		normal_vectors(); // wektory wypelniane danymi
+		new_file << "First calculation of left side: " << first_calculation(ammount_of_samples / 2, left) << endl; // pierwsze obliczenia dla wektora lewego
+		new_file << "First calculation of right side: " << first_calculation(ammount_of_samples / 2, right) << endl; // pierwsze obliczenia dla wektora prawego
+
+		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
+		new_file << "Second calculation of left side: " << first_calculation(ammount_of_samples / 2, left_minus) << endl;  // drugie obliczenia dla wektora lewego
+		new_file << "Second calculation of right side: " << first_calculation(ammount_of_samples / 2, right_minus) << endl; // drugie obliczenia dla wektora prawego
 
 	}
 	 
@@ -71,7 +77,7 @@ public:
 		new_file.close();
 	}
 
-	void ReadData() //czytanie wartoœci próbek do wektorów kana³ów
+	void ReadData() //czytanie danych
 	{
 		fread(&riff, sizeof(FOURCC), 1, wf);
 		fread(&size_of_file, sizeof(DWORD), 1, wf);
@@ -89,9 +95,8 @@ public:
 	}
 
 	
-	void calculations()
+	void normal_vectors() // wypelnie wektorow danymi
 	{
-		ammount_of_samples = size_of_data / 4;
 		for (int i = 0; i < ammount_of_samples; i++)
 		{
 			fread(&data_of_file, sizeof(INT16), 1, wf);
@@ -107,8 +112,32 @@ public:
 
 		
 	}
-
-	double first_calculation(double a, vector<INT16> b)
+	void minus_vectors() // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
+	{
+		for (int i = 0; i < left.size(); i++)
+		{
+			if (i == 0)
+			{
+				left_minus.push_back (left.at(i));
+			}
+			else
+			{
+				left_minus.push_back (left.at(i) - left.at(i - 1));
+			}
+		}
+		for (int i = 0; i < right.size(); i++)
+		{
+			if (i == 0)
+			{
+				right_minus.push_back(right.at(i));
+			}
+			else
+			{
+				right_minus.push_back(right.at(i) - right.at(i - 1));
+			}
+		}
+	}
+	double first_calculation(double a, vector<INT16> b) // obliczanie tej sumy
 	{
 		double full = 0;
 		for (double i = 0; i < a; i++)
