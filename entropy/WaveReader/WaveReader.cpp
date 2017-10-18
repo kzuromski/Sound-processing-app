@@ -11,6 +11,8 @@
 #include <fstream>
 #include <time.h>
 #include <vector>
+#include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -63,12 +65,15 @@ public:
 		new_file << "Size of data: " << size_of_data << endl;
 		new_file << "Ammount of samples: " << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
-		new_file << "First calculation of left side: " << first_calculation(ammount_of_samples / 2, left) << endl; // pierwsze obliczenia dla wektora lewego
-		new_file << "First calculation of right side: " << first_calculation(ammount_of_samples / 2, right) << endl; // pierwsze obliczenia dla wektora prawego
+		new_file << "First calculation: " << ((first_calculation(ammount_of_samples / 2, left)+ first_calculation(ammount_of_samples / 2, right))/2) << endl; // pierwsze obliczenia
 
 		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
-		new_file << "Second calculation of left side: " << first_calculation(ammount_of_samples / 2, left_minus) << endl;  // drugie obliczenia dla wektora lewego
-		new_file << "Second calculation of right side: " << first_calculation(ammount_of_samples / 2, right_minus) << endl; // drugie obliczenia dla wektora prawego
+		new_file << "Second calculation: " << ((first_calculation(ammount_of_samples / 2, left_minus)+ first_calculation(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
+
+		
+		cout << first_entro(left) << endl;
+		//display(counter(left));
+
 
 	}
 	 
@@ -150,9 +155,64 @@ public:
 		return full;
 	}
 
+	double geting_max_value(vector<INT16> a)
+	{
+		double max_val_vec = *max_element(a.begin(), a.end());
+		return max_val_vec;
+	}
+	double geting_min_value(vector<INT16> a)
+	{
+		double min_val_vec = *min_element(a.begin(), a.end());
+		return min_val_vec;
+	}
+
+	double first_entro(vector<INT16> a)
+	{
+		double entro=0; // wartosc entro poczatkowo ustawiona na 0
+		double min = geting_min_value(a); // najmniejsza wartosc w vektorze
+		double max = geting_min_value(a); // najwieksza wartosc w wektorze
+
+		for (min; min <= max; min++) // petla idaca od najmniejszego elementu do najwiekszego elementu
+		{
+			int same=0; // licznik dla takich powtorzen liczby
+			for (int i = 0; i < a.size(); i++) // petla idaca od 0 do wielkosci vektora w ktorym sprawdzamy powtarzajace sie liczby
+			{
+				if (min == a.at(i)) // jezeli liczba ma wartosc min, czyli taka ktora teraz sprawdzamy to same ma sie powiekszyc
+				{
+					same++;
+				}
+			}
+			double p_i = same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
+			entro = entro + (p_i * p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*pi*log2pi)
+		}
+
+		return entro * (-1); // przed ta suma we wzorze byl jeszcze -
+	}
+
+
+	/*std::map<int, unsigned int> counter(const std::vector<INT16>& vals) {
+		std::map<int, unsigned int> rv;
+
+		for (auto val = vals.begin(); val != vals.end(); ++val) {
+			rv[*val]++;
+		}
+
+		return rv;
+	}
+
+	void display(const std::map<int, unsigned int>& counts) {
+		for (auto count = counts.begin(); count != counts.end(); ++count) {
+			std::cout << "Value " << count->first << " has count "
+				<< count->second << std::endl;
+		}
+	}*/
+
+
+
 };
 
 void main()
 {
 	WaveReader wave("sample.wav");
+	getchar();
 }
