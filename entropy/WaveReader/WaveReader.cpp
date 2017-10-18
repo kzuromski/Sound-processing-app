@@ -71,8 +71,9 @@ public:
 		new_file << "Second calculation: " << ((first_calculation(ammount_of_samples / 2, left_minus)+ first_calculation(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
 
 		
-		cout << first_entro(left) << endl;
-		//display(counter(left));
+		new_file << "Third calculation: " << ((first_entro(left) + first_entro(right)) / 2) << endl; // entro dla normalnych
+
+		new_file << "Fourth calculation: " << ((first_entro(left_minus) + first_entro(right_minus)) / 2) << endl; // entro dla tych errorow
 
 
 	}
@@ -174,7 +175,7 @@ public:
 
 		for (min; min <= max; min++) // petla idaca od najmniejszego elementu do najwiekszego elementu
 		{
-			int same=0; // licznik dla takich powtorzen liczby
+			double same=0; // licznik dla takich powtorzen liczby
 			for (int i = 0; i < a.size(); i++) // petla idaca od 0 do wielkosci vektora w ktorym sprawdzamy powtarzajace sie liczby
 			{
 				if (min == a.at(i)) // jezeli liczba ma wartosc min, czyli taka ktora teraz sprawdzamy to same ma sie powiekszyc
@@ -183,7 +184,7 @@ public:
 				}
 			}
 			double p_i = same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
-			entro = entro + (p_i * p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*pi*log2pi)
+			entro = entro + (p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*pi*log2pi)
 		}
 
 		return entro * (-1); // przed ta suma we wzorze byl jeszcze -
@@ -214,5 +215,4 @@ public:
 void main()
 {
 	WaveReader wave("sample.wav");
-	getchar();
 }
