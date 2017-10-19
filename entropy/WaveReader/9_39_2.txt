@@ -1,0 +1,7 @@
+sample.wav
+Size of data: 951808
+Ammount of samples: 237952
+First calculation: 116839
+Second calculation: 0.938433
+Third calculation: 0.000141712
+Fourth calculation: 0.000141712
