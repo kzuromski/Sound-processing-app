@@ -1,0 +1,4 @@
+chanchan.wav
+Size of data: 1901879668
+Ammount of samples: 4.7547e+08
+wielkość pliku - 48 bitów / 4

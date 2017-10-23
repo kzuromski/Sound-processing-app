@@ -35,9 +35,9 @@ private:
 	DWORD size_of_data; // size of data chunk
 	INT16 data_of_file;
 	vector<INT16> left;
-	vector<INT16> left_minus;
+	vector<double> left_minus;
 	vector<INT16> right;
-	vector<INT16> right_minus;
+	vector<double> right_minus;
 	ofstream new_file;
 	FILE *wf;
 	double ammount_of_samples;
@@ -71,12 +71,12 @@ public:
 		new_file << "First calculation: " << ((first_calculation(ammount_of_samples / 2, left)+ first_calculation(ammount_of_samples / 2, right))/2) << endl; // pierwsze obliczenia
 
 		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
-		new_file << "Second calculation: " << ((first_calculation(ammount_of_samples / 2, left_minus)+ first_calculation(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
+		new_file << "Second calculation: " << ((first_calculation_minus(ammount_of_samples / 2, left_minus)+ first_calculation_minus(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
 
 		
 		new_file << "Third calculation: " << ((first_entro(left) + first_entro(right)) / 2) << endl; // entro dla normalnych
 
-		new_file << "Fourth calculation: " << ((first_entro(left_minus) + first_entro(right_minus)) / 2) << endl; // entro dla tych errorow
+		//new_file << "Fourth calculation: " << ((first_entro(left_minus) + first_entro(right_minus)) / 2) << endl; // entro dla tych errorow
 
 
 	}
@@ -90,17 +90,22 @@ public:
 	{
 		fread(&riff, sizeof(FOURCC), 1, wf);
 		fread(&size_of_file, sizeof(DWORD), 1, wf);
+		cout << (size_of_file - 48) /4 << endl;
 		fread(&wave, sizeof(FOURCC), 1, wf);
 		fread(&fmt, sizeof(FOURCC), 1, wf);
 		fread(&chunk, sizeof(FOURCC), 1, wf);
 		fread(&pcm, sizeof(WORD), 1, wf);
 		fread(&chanel, sizeof(WORD), 1, wf);
 		fread(&sample_rate, sizeof(DWORD), 1, wf);
+		cout << sample_rate << endl;
 		fread(&bytes_per_sec, sizeof(DWORD), 1, wf);
 		fread(&block_alignment, sizeof(WORD), 1, wf);
 		fread(&bits_per_sample, sizeof(WORD), 1, wf);
+		cout << bits_per_sample << endl;
 		fread(&data, sizeof(FOURCC), 1, wf);
+		cout << data << endl;
 		fread(&size_of_data, sizeof(DWORD), 1, wf);
+		cout << size_of_data << endl;
 	}
 
 	
@@ -149,7 +154,20 @@ public:
 	double first_calculation(double a, vector<INT16> b) // obliczanie tej sumy
 	{
 		double full = 0;
-		for (double i = 0; i < a; i++)
+		for (INT32 i = 0; i < a; i++)
+		{
+			full = (double)(full + (((double)b.at(i) * (double)b.at(i))));
+			cout << full << endl;
+		}
+
+		full = full / a;
+		
+		return full;
+	}
+	double first_calculation_minus(double a, vector<double> b) // obliczanie tej sumy
+	{
+		double full = 0;
+		for (INT32 i = 0; i < a; i++)
 		{
 			full = (double)(full + (b.at(i) * b.at(i)));
 		}
@@ -308,7 +326,7 @@ public:
 
 void main()
 {
-	WaveReader wave("sample.wav");
-	wave.SystemOfEquations();
-	system("pause");
+	WaveReader wave("chanchan.wav");
+	//wave.SystemOfEquations();
+	//system("pause");
 }
