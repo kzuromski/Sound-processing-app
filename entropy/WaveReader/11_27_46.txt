@@ -1,3 +1,0 @@
-chanchan.wav
-Size of data: 1901879668
-Ammount of samples: 4.7547e+08

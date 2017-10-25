@@ -62,21 +62,21 @@ public:
 		ReadData();
 
 		ofstream new_file(file_name + ".txt");
-		ammount_of_samples = size_of_data / 4;
+		//ammount_of_samples = (size_of_data-data) / 2;
+		ammount_of_samples = ((size_of_file - 48)-2) / 2;
 
 		new_file << name_of_wave << endl;
-		new_file << "Size of data: " << size_of_data << endl;
-		new_file << "Ammount of samples: " << ammount_of_samples << endl;
+		new_file << "Suma próbek z obu kana³ów: " << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
-		new_file << "First calculation: " << ((first_calculation(ammount_of_samples / 2, left)+ first_calculation(ammount_of_samples / 2, right))/2) << endl; // pierwsze obliczenia
+		new_file << "Przeciêtna energia sygna³u: " << ((first_calculation(ammount_of_samples / 2, left)+ first_calculation(ammount_of_samples / 2, right))/2) << endl; // pierwsze obliczenia
 
 		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
-		new_file << "Second calculation: " << ((first_calculation_minus(ammount_of_samples / 2, left_minus)+ first_calculation_minus(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
+		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << ((first_calculation_minus(ammount_of_samples / 2, left_minus)+ first_calculation_minus(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
 
 		
-		new_file << "Third calculation: " << ((first_entro(left) + first_entro(right)) / 2) << endl; // entro dla normalnych
+		new_file << "Entropia: " << ((first_entro(left) + first_entro(right)) / 2) << endl; // entro dla normalnych
 
-		//new_file << "Fourth calculation: " << ((first_entro(left_minus) + first_entro(right_minus)) / 2) << endl; // entro dla tych errorow
+		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((first_entro_minus(left_minus) + first_entro_minus(right_minus)) / 2) << endl; // entro dla tych errorow
 
 
 	}
@@ -90,22 +90,17 @@ public:
 	{
 		fread(&riff, sizeof(FOURCC), 1, wf);
 		fread(&size_of_file, sizeof(DWORD), 1, wf);
-		cout << (size_of_file - 48) /4 << endl;
 		fread(&wave, sizeof(FOURCC), 1, wf);
 		fread(&fmt, sizeof(FOURCC), 1, wf);
 		fread(&chunk, sizeof(FOURCC), 1, wf);
 		fread(&pcm, sizeof(WORD), 1, wf);
 		fread(&chanel, sizeof(WORD), 1, wf);
 		fread(&sample_rate, sizeof(DWORD), 1, wf);
-		cout << sample_rate << endl;
 		fread(&bytes_per_sec, sizeof(DWORD), 1, wf);
 		fread(&block_alignment, sizeof(WORD), 1, wf);
 		fread(&bits_per_sample, sizeof(WORD), 1, wf);
-		cout << bits_per_sample << endl;
 		fread(&data, sizeof(FOURCC), 1, wf);
-		cout << data << endl;
 		fread(&size_of_data, sizeof(DWORD), 1, wf);
-		cout << size_of_data << endl;
 	}
 
 	
@@ -157,7 +152,6 @@ public:
 		for (INT32 i = 0; i < a; i++)
 		{
 			full = (double)(full + (((double)b.at(i) * (double)b.at(i))));
-			cout << full << endl;
 		}
 
 		full = full / a;
@@ -177,22 +171,32 @@ public:
 		return full;
 	}
 
-	double geting_max_value(vector<INT16> a)
+	double geting_max_value(vector<INT16> a) // pobieranie maksymalnej wartosci z vectora sampli
 	{
 		double max_val_vec = *max_element(a.begin(), a.end());
 		return max_val_vec;
 	}
-	double geting_min_value(vector<INT16> a)
+	double geting_min_value(vector<INT16> a) // poobieranie minimalnej wartosci z vectora sampli
+	{
+		double min_val_vec = *min_element(a.begin(), a.end());
+		return min_val_vec;
+	}
+	double geting_max_value_minus(vector<double> a) // to samo co get_max_value tylko inny typ danych
+	{
+		double max_val_vec = *max_element(a.begin(), a.end());
+		return max_val_vec;
+	}
+	double geting_min_value_minus(vector<double> a) // takie same jak get_min_value tylko inny typ danych
 	{
 		double min_val_vec = *min_element(a.begin(), a.end());
 		return min_val_vec;
 	}
 
-	double first_entro(vector<INT16> a)
+	double first_entro(vector<INT16> a) // liczenie entropi
 	{
 		double entro=0; // wartosc entro poczatkowo ustawiona na 0
 		double min = geting_min_value(a); // najmniejsza wartosc w vektorze
-		double max = geting_min_value(a); // najwieksza wartosc w wektorze
+		double max = geting_max_value(a); // najwieksza wartosc w wektorze
 
 		for (min; min <= max; min++) // petla idaca od najmniejszego elementu do najwiekszego elementu
 		{
@@ -204,30 +208,41 @@ public:
 					same++;
 				}
 			}
-			double p_i = same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
-			entro = entro + (p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*pi*log2pi)
+			if (same != 0)
+			{
+				double p_i = (double) same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
+				entro = entro + (p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*log2pi)
+			}
 		}
 
 		return entro * (-1); // przed ta suma we wzorze byl jeszcze -
 	}
 
+	double first_entro_minus(vector<double> a) // to samo co first_entro tylko inny typ danych
+	{
+		double entro = 0; // wartosc entro poczatkowo ustawiona na 0
+		double min = geting_min_value_minus(a); // najmniejsza wartosc w vektorze
+		double max = geting_max_value_minus(a); // najwieksza wartosc w wektorze
 
-	/*std::map<int, unsigned int> counter(const std::vector<INT16>& vals) {
-		std::map<int, unsigned int> rv;
-
-		for (auto val = vals.begin(); val != vals.end(); ++val) {
-			rv[*val]++;
+		for (min; min <= max; min++) // petla idaca od najmniejszego elementu do najwiekszego elementu
+		{
+			double same = 0; // licznik dla takich powtorzen liczby
+			for (int i = 0; i < a.size(); i++) // petla idaca od 0 do wielkosci vektora w ktorym sprawdzamy powtarzajace sie liczby
+			{
+				if (min == a.at(i)) // jezeli liczba ma wartosc min, czyli taka ktora teraz sprawdzamy to same ma sie powiekszyc
+				{
+					same++;
+				}
+			}
+			if (same != 0)
+			{
+				double p_i = (double)same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
+				entro = entro + (p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*log2pi)
+			}
 		}
 
-		return rv;
+		return entro * (-1); // przed ta suma we wzorze byl jeszcze -
 	}
-
-	void display(const std::map<int, unsigned int>& counts) {
-		for (auto count = counts.begin(); count != counts.end(); ++count) {
-			std::cout << "Value " << count->first << " has count "
-				<< count->second << std::endl;
-		}
-	}*/
 
 	// Funkcja dokonuje rozk³adu LU macierzy A
 	bool ludist(int n, double ** A)

@@ -1,6 +1,0 @@
-sample2.wav
-Size of data: 1249048
-Ammount of samples: 312262
-First calculation: 379.091
-Second calculation: 5.09633
-Third calculation: 0.000254617
