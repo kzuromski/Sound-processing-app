@@ -1,6 +1,0 @@
-sample.wav
-Suma próbek z obu kana³ów: 475956
-Przeciêtna energia sygna³u: 5.23724e+07
-Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 875771
-Entropia: 13.9612
-Entropia z danych po skanowaniu ró¿nicowym: 11.1485

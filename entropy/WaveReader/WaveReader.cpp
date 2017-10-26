@@ -7,11 +7,8 @@
 #include <cmath>
 #include <string>
 #include "windows.h"
-#include "mmsystem.h"
 #include <fstream>
-#include <time.h>
 #include <vector>
-#include <map>
 #include <algorithm>
 #include <iomanip>
 
@@ -55,30 +52,23 @@ public:
 			cout << "File is not opened" << endl;
 			exit(-1);
 		}
-		SYSTEMTIME time;
-		GetLocalTime(&time);
-		string file_name;
-		file_name = to_string(time.wHour) + "_" + to_string(time.wMinute) + "_" + to_string(time.wSecond);
+
 		ReadData();
 
-		ofstream new_file(file_name + ".txt");
-		//ammount_of_samples = (size_of_data-data) / 2;
-		ammount_of_samples = ((size_of_file - 48)-2)/ 2;
+		ofstream new_file(name_of_wave + ".txt");
+		ammount_of_samples = ((size_of_file - 48)-2)/ 2; // liczba probek z obu kanalow
 		new_file << name_of_wave << endl;
 		new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
 
 		double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
 		new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
-
-		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
-		double f = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
-		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << f << endl;  // drugie obliczenia
-
+		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
+		d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
+		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
 		
-		new_file << "Entropia: " << ((first_entro(left) + first_entro(right)) / 2) << endl; // entro dla normalnych
-
-		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((first_entro_minus(left_minus) + first_entro_minus(right_minus)) / 2) << endl; // entro dla tych errorow
+		new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
+		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus)) / 2) << endl; // entro dla tych po skalowaniu
 
 
 	}
@@ -106,7 +96,7 @@ public:
 	}
 
 	
-	void normal_vectors() // wypelnie wektorow danymi
+	void normal_vectors() // wypelnie wektorow danymi, parzyste do lewego, nieparzyste do prawego
 	{
 		for (int i = 0; i < ammount_of_samples; i++)
 		{
@@ -121,6 +111,7 @@ public:
 			}
 		}
 	}
+
 	void minus_vectors() // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
 	{
 		for (int i = 0; i < left.size(); i++)
@@ -146,6 +137,7 @@ public:
 			}
 		}
 	}
+
 	double first_calculation(double a, vector<INT16> b) // obliczanie tej sumy
 	{
 		double full = 0;
@@ -158,7 +150,8 @@ public:
 		
 		return full;
 	}
-	double first_calculation_minus(double a, vector<double> b) // obliczanie tej sumy
+
+	double first_calculation_minus(double a, vector<double> b) // funkcje x_minus to te same funkcje co wyzej tylko przymujace inny typ danych
 	{
 		double full = 0;
 		for (INT32 i = 0; i < a; i++)
@@ -171,80 +164,45 @@ public:
 		return full;
 	}
 
-	double geting_max_value(vector<INT16> a) // pobieranie maksymalnej wartosci z vectora sampli
+	double entro(vector<INT16> a) // obliczanie entropi
 	{
-		double max_val_vec = *max_element(a.begin(), a.end());
-		return max_val_vec;
-	}
-	double geting_min_value(vector<INT16> a) // poobieranie minimalnej wartosci z vectora sampli
-	{
-		double min_val_vec = *min_element(a.begin(), a.end());
-		return min_val_vec;
-	}
-	double geting_max_value_minus(vector<double> a) // to samo co get_max_value tylko inny typ danych
-	{
-		double max_val_vec = *max_element(a.begin(), a.end());
-		return max_val_vec;
-	}
-	double geting_min_value_minus(vector<double> a) // takie same jak get_min_value tylko inny typ danych
-	{
-		double min_val_vec = *min_element(a.begin(), a.end());
-		return min_val_vec;
-	}
-
-	double first_entro(vector<INT16> a) // liczenie entropi
-	{
-		double entro=0; // wartosc entro poczatkowo ustawiona na 0
-		double min = geting_min_value(a); // najmniejsza wartosc w vektorze
-		double max = geting_max_value(a); // najwieksza wartosc w wektorze
-
-		for (min; min <= max; min++) // petla idaca od najmniejszego elementu do najwiekszego elementu
+		double entro = 0;
+		vector <double> buffor(131072, 0); // vector przetrzymujacy 2^17 miejsc
+		for (int i = 0; i < a.size(); i++)
 		{
-			double same=0; // licznik dla takich powtorzen liczby
-			for (int i = 0; i < a.size(); i++) // petla idaca od 0 do wielkosci vektora w ktorym sprawdzamy powtarzajace sie liczby
+			buffor.at(a.at(i) + 65536)++; // dodawanie powtarzajacych sie wartosci
+		}
+		for (int i = 0; i < 131072; i++)
+		{
+			if (buffor.at(i) != 0) // jezeli probka sie nie pojawila i jest 0 to nie mozemy jej uzyc, bo logarytm wywali nand
 			{
-				if (min == a.at(i)) // jezeli liczba ma wartosc min, czyli taka ktora teraz sprawdzamy to same ma sie powiekszyc
-				{
-					same++;
-					//cout << a.at(i) << ": " << same << endl;
-				}
-			}
-			if (same != 0)
-			{
-				double p_i = (double) same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
-				entro = entro + (p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*log2pi)
+				double p_i = (double)buffor.at(i) / a.size();
+				entro = entro + (p_i*log2(p_i));
 			}
 		}
-
-		return entro * (-1); // przed ta suma we wzorze byl jeszcze -
+		return entro *(-1);
 	}
 
-	double first_entro_minus(vector<double> a) // to samo co first_entro tylko inny typ danych
+	double entro_minus(vector<double> a)
 	{
-		double entro = 0; // wartosc entro poczatkowo ustawiona na 0
-		double min = geting_min_value_minus(a); // najmniejsza wartosc w vektorze
-		double max = geting_max_value_minus(a); // najwieksza wartosc w wektorze
-
-		for (min; min <= max; min++) // petla idaca od najmniejszego elementu do najwiekszego elementu
+		double entro = 0;
+		vector <double> buffor(131072, 0);
+		for (int i = 0; i < a.size(); i++)
 		{
-			double same = 0; // licznik dla takich powtorzen liczby
-			for (int i = 0; i < a.size(); i++) // petla idaca od 0 do wielkosci vektora w ktorym sprawdzamy powtarzajace sie liczby
+			buffor.at(a.at(i)+ 65536)++;
+		}
+		for (int i = 0; i < 131072; i++)
+		{
+			if (buffor.at(i) != 0)
 			{
-				if (min == a.at(i)) // jezeli liczba ma wartosc min, czyli taka ktora teraz sprawdzamy to same ma sie powiekszyc
-				{
-					same++;
-				}
-			}
-
-			if (same != 0)
-			{
-				double p_i = (double)same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow
-				entro = entro + (p_i*log2(p_i)); // wzor entro czyli suma_elementow(pi*log2pi)
+				double p_i = (double)buffor.at(i) / a.size();
+				entro = entro + (p_i*log2(p_i));
 			}
 		}
-
-		return entro * (-1); // przed ta suma we wzorze byl jeszcze -
+		return entro *(-1);
 	}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 	// Funkcja dokonuje rozk³adu LU macierzy A
 	bool ludist(int n, double ** A)
@@ -343,7 +301,22 @@ public:
 
 void main()
 {
-	WaveReader wave("chanchan.wav");
+	WaveReader wave1("ATrain.wav");
+	WaveReader wave2("BeautySlept.wav");
+	WaveReader wave3("death2.wav");
+	WaveReader wave4("experiencia.wav");
+	WaveReader wave5("female_speech.wav");
+	WaveReader wave6("FloorEssence.wav");
+	WaveReader wave7("ItCouldBeSweet.wav");
+	WaveReader wave8("Layla.wav");
+	WaveReader wave9("LifeShatters.wav");
+	WaveReader wave10("macabre.wav");
+	WaveReader wave11("male_speech.wav");
+	WaveReader wave12("SinceAlways.wav");
+	WaveReader wave13("thear1.wav");
+	WaveReader wave14("TomsDiner.wav");
+	WaveReader wave15("velvet.wav");
+
 	//wave.SystemOfEquations();
 	//system("pause");
 }
