@@ -1,7 +1,0 @@
-chanchan.wav
-Size of data: 1901879668
-Ammount of samples: 531540
-First calculation: 784978
-Second calculation: 0.789867
-Third calculation: 6.78023e-05
-Fourth calculation: 6.78023e-05

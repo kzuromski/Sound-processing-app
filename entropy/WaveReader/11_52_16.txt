@@ -1,0 +1,4 @@
+chanchan.wav
+Liczba próbek z obu kana³ów: 1063080.000000
+Przeciêtna energia sygna³u: 25028253.164715
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 1148867.448639

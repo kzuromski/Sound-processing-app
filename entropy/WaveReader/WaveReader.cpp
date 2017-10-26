@@ -48,7 +48,7 @@ public:
 	{
 		
 		const char * c = name_of_wave.c_str();
-		wf = fopen(c, "r");
+		wf = fopen(c, "rb");
 
 		if (wf == NULL)
 		{
@@ -63,15 +63,17 @@ public:
 
 		ofstream new_file(file_name + ".txt");
 		//ammount_of_samples = (size_of_data-data) / 2;
-		ammount_of_samples = ((size_of_file - 48)-2) / 2;
-
+		ammount_of_samples = ((size_of_file - 48)-2)/ 2;
 		new_file << name_of_wave << endl;
-		new_file << "Suma próbek z obu kana³ów: " << ammount_of_samples << endl;
+		new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
-		new_file << "Przeciêtna energia sygna³u: " << ((first_calculation(ammount_of_samples / 2, left)+ first_calculation(ammount_of_samples / 2, right))/2) << endl; // pierwsze obliczenia
+
+		double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
+		new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
 
 		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
-		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << ((first_calculation_minus(ammount_of_samples / 2, left_minus)+ first_calculation_minus(ammount_of_samples / 2, right_minus))/2) << endl;  // drugie obliczenia
+		double f = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
+		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << f << endl;  // drugie obliczenia
 
 		
 		new_file << "Entropia: " << ((first_entro(left) + first_entro(right)) / 2) << endl; // entro dla normalnych
@@ -118,8 +120,6 @@ public:
 				right.push_back(data_of_file);
 			}
 		}
-
-		
 	}
 	void minus_vectors() // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
 	{
@@ -206,6 +206,7 @@ public:
 				if (min == a.at(i)) // jezeli liczba ma wartosc min, czyli taka ktora teraz sprawdzamy to same ma sie powiekszyc
 				{
 					same++;
+					//cout << a.at(i) << ": " << same << endl;
 				}
 			}
 			if (same != 0)
@@ -234,6 +235,7 @@ public:
 					same++;
 				}
 			}
+
 			if (same != 0)
 			{
 				double p_i = (double)same / a.size(); // tutaj jest dzielenie ilosci powtorzen przez ilosc wszystkich elentow

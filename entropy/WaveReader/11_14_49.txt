@@ -1,0 +1,4 @@
+chanchan.wav
+Suma próbek z obu kana³ów: 1.06308e+06
+Przeciêtna energia sygna³u: 23.543151
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 1.080697

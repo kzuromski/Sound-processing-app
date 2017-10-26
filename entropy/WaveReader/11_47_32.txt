@@ -1,0 +1,6 @@
+chanchan.wav
+Liczba próbek z obu kana³ów: 1063080.000000
+Przeciêtna energia sygna³u: 5002.824519
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 1071.852345
+Entropia: 14.182765
+Entropia z danych po skanowaniu ró¿nicowym: 11.693301
