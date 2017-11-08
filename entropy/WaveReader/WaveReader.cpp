@@ -316,6 +316,7 @@ void main()
 	WaveReader wave13("thear1.wav");
 	WaveReader wave14("TomsDiner.wav");
 	WaveReader wave15("velvet.wav");
+	WaveReader wave16("chanchan.wav");
 
 	//wave.SystemOfEquations();
 	//system("pause");
