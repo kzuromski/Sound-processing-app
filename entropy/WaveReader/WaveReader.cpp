@@ -39,6 +39,7 @@ private:
 	FILE *wf;
 	double ammount_of_samples;
 	const double eps = 1e-12; //wspolczynnik
+	vector <double> xDaszekVector;
 
 public:
 	WaveReader(string name_of_wave)
@@ -69,6 +70,8 @@ public:
 		
 		new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
 		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus)) / 2) << endl; // entro dla tych po skalowaniu
+		SystemOfEquations();
+		new_file << "Entropia ze wspó³czynnikiem " << entro_daszek(xDaszekVector)<<endl;
 
 
 	}
@@ -201,6 +204,25 @@ public:
 		}
 		return entro *(-1);
 	}
+
+	double entro_daszek(vector<double> a)
+	{
+		double entro = 0;
+		vector <double> buffor(33554432, 0);
+		for (int i = 0; i < a.size(); i++)
+		{
+			buffor.at(a.at(i) + 16777216)++;
+		}
+		for (int i = 0; i < 33554432; i++)
+		{
+			if (buffor.at(i) != 0)
+			{
+				double p_i = (double)buffor.at(i) / a.size();
+				entro = entro + (p_i*log2(p_i));
+			}
+		}
+		return entro *(-1);
+	}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -260,10 +282,11 @@ public:
 		return true;
 	}
 
+	
 	void SystemOfEquations() {
 		double **A, *B, *X;
 		int n, r, i, j;
-
+		
 		r = 3;
 		n = r;
 
@@ -277,26 +300,92 @@ public:
 		for (i = 0; i < n; i++) 
 			A[i] = new double[n];
 
+		int N = ammount_of_samples/2; //dla jednego kanalu
+		j = 1;
+		int sum = 0; //zerowanie sumy
+		int sum2 = 0;
+		vector<double>a; //wektor dla macierzy X
+		vector<double>b; //wektor dla macierzy P
+
+		for (i = 1; i <= r; i++)
+		{
+			for (int z = r; z < N; z++)
+			{
+				sum += (left.at(z - i)*left.at(z - j)) + (right.at(z - i) * right.at(z - j)); //suma dla elementów macierzy X
+				sum2 += (left.at(z) * left.at(z - i)) + (right.at(z) * right.at(z - i)); //suma dla elementów macierzy P
+				
+			}
+			a.push_back(sum);
+
+			if (j == 1)
+			{
+				b.push_back(sum2);
+			}
+			sum = 0;
+			sum2 = 0;
+			if (i == r && j != r)
+			{
+				j++;
+				i = 0;
+			}
+		}
+
+		int licznik=0;
+		j = 0;
 		for (i = 0; i < n; i++){
-			for (j = 0; j < n; j++) 
-				A[i][j] = right.at(n + i - j - 1) * right.at(n + i - 1);
-			B[i] = right.at(n + i) * right.at(n + i - (i + 1));
+			
+			A[i][j] = a.at(licznik); // Macierz X (3x3)
+			licznik++;
+			B[i] = b.at(i); // Macierz P (3x1)
+		
+			if (i == n-1 && j != n-1)
+			{
+				i = -1;
+				j++;
+			}
+			
 		}
 
 		//wyswietlamy:
 		for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++)
-				cout << A[i][j] << " ";
-			cout << B[i] << endl;
+				cout << A[i][j] << "\t";
+			cout << "\t" << B[i] << endl;
 		}
 
 		// rozwi¹zujemy uk³ad i wyœwietlamy wyniki
+		double sumA = 0;
 		if (ludist(n, A) && lusolve(n, A, B, X))
 		{
-			for (i = 0; i < n; i++) cout << "a" << i + 1 << " = " << setw(9) << X[i] << endl;
+			for (i = 0; i < n; i++) {
+				cout << "a" << i + 1 << " = " << setw(9) << X[i] << endl;
+				sumA += X[i];
+			}
+			cout << "Suma wspolczynnikow: " << sumA << endl;
 		}
 		else cout << "DZIELNIK ZERO\n";
 
+		vector<double>maleA;
+		for (int i = 0; i < r; i++) {
+			maleA.push_back(X[i]);
+		}
+		double xDaszek=0;
+		
+
+		for (size_t i = 0; i < ammount_of_samples/2; i++)
+		{
+			if (i <= r)
+			{
+				xDaszekVector.push_back(right.at(i));
+			}
+			else {
+				for (size_t j = 0; j < r; j++)
+				{
+					xDaszek += maleA.at(j) * right.at(i-j);
+				}
+				xDaszekVector.push_back(floor(xDaszek*0.5));
+			}
+		}
 		// usuwamy macierze z pamiêci
 		for (i = 0; i < n; i++) delete[] A[i];
 		delete[] A;
@@ -325,6 +414,6 @@ void main()
 	WaveReader wave15("velvet.wav");
 	WaveReader wave16("chanchan.wav");*/
 
-	wave1.SystemOfEquations();
+	//wave1.SystemOfEquations();
 	system("pause");
 }
