@@ -204,6 +204,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
 	// Funkcja dokonuje rozk³adu LU macierzy A
 	bool ludist(int n, double ** A)
 	{
@@ -261,32 +262,38 @@ public:
 
 	void SystemOfEquations() {
 		double **A, *B, *X;
-		int n, i, j;
+		int n, r, i, j;
+
+		r = 3;
+		n = r;
 
 		cout << setprecision(4) << fixed;
-
-		cout << "PODAJ N" << endl;
-		cin >> n;
 
 		// tworzymy macierze A, B i X
 		A = new double *[n];
 		B = new double[n];
 		X = new double[n];
 
-		for (i = 0; i < n; i++) A[i] = new double[n];
+		for (i = 0; i < n; i++) 
+			A[i] = new double[n];
 
-		// odczytujemy dane dla macierzy A i B
-		cout << "Podaj A i B" << endl;
-		for (i = 0; i < n; i++)
-		{
-			for (j = 0; j < n; j++) cin >> A[i][j];
-			cin >> B[i];
+		for (i = 0; i < n; i++){
+			for (j = 0; j < n; j++) 
+				A[i][j] = right.at(n + i - j - 1) * right.at(n + i - 1);
+			B[i] = right.at(n + i) * right.at(n + i - (i + 1));
+		}
+
+		//wyswietlamy:
+		for (i = 0; i < n; i++) {
+			for (j = 0; j < n; j++)
+				cout << A[i][j] << " ";
+			cout << B[i] << endl;
 		}
 
 		// rozwi¹zujemy uk³ad i wyœwietlamy wyniki
 		if (ludist(n, A) && lusolve(n, A, B, X))
 		{
-			for (i = 0; i < n; i++) cout << "x" << i + 1 << " = " << setw(9) << X[i] << endl;
+			for (i = 0; i < n; i++) cout << "a" << i + 1 << " = " << setw(9) << X[i] << endl;
 		}
 		else cout << "DZIELNIK ZERO\n";
 
@@ -302,7 +309,7 @@ public:
 void main()
 {
 	WaveReader wave1("ATrain.wav");
-	WaveReader wave2("BeautySlept.wav");
+	/*WaveReader wave2("BeautySlept.wav");
 	WaveReader wave3("death2.wav");
 	WaveReader wave4("experiencia.wav");
 	WaveReader wave5("female_speech.wav");
@@ -316,8 +323,8 @@ void main()
 	WaveReader wave13("thear1.wav");
 	WaveReader wave14("TomsDiner.wav");
 	WaveReader wave15("velvet.wav");
-	WaveReader wave16("chanchan.wav");
+	WaveReader wave16("chanchan.wav");*/
 
-	//wave.SystemOfEquations();
-	//system("pause");
+	wave1.SystemOfEquations();
+	system("pause");
 }
