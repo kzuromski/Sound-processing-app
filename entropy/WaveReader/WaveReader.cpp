@@ -208,12 +208,12 @@ public:
 	double entro_daszek(vector<double> a)
 	{
 		double entro = 0;
-		vector <double> buffor(33554432, 0);
+		vector <double> buffor(16777216, 0);
 		for (int i = 0; i < a.size(); i++)
 		{
-			buffor.at(a.at(i) + 16777216)++;
+			buffor.at(a.at(i) + 8388608)++;
 		}
-		for (int i = 0; i < 33554432; i++)
+		for (int i = 0; i < 16777216; i++)
 		{
 			if (buffor.at(i) != 0)
 			{
@@ -302,8 +302,8 @@ public:
 
 		int N = ammount_of_samples/2; //dla jednego kanalu
 		j = 1;
-		int sum = 0; //zerowanie sumy
-		int sum2 = 0;
+		double sum = 0; //zerowanie sumy
+		double sum2 = 0;
 		vector<double>a; //wektor dla macierzy X
 		vector<double>b; //wektor dla macierzy P
 
@@ -313,7 +313,6 @@ public:
 			{
 				sum += (left.at(z - i)*left.at(z - j)) + (right.at(z - i) * right.at(z - j)); //suma dla elementów macierzy X
 				sum2 += (left.at(z) * left.at(z - i)) + (right.at(z) * right.at(z - i)); //suma dla elementów macierzy P
-				
 			}
 			a.push_back(sum);
 
@@ -343,7 +342,6 @@ public:
 				i = -1;
 				j++;
 			}
-			
 		}
 
 		//wyswietlamy:
@@ -369,9 +367,8 @@ public:
 		for (int i = 0; i < r; i++) {
 			maleA.push_back(X[i]);
 		}
-		double xDaszek=0;
-		
 
+		double xDaszek=0;
 		for (size_t i = 0; i < ammount_of_samples/2; i++)
 		{
 			if (i <= r)
@@ -383,7 +380,7 @@ public:
 				{
 					xDaszek += maleA.at(j) * right.at(i-j);
 				}
-				xDaszekVector.push_back(floor(xDaszek*0.5));
+				xDaszekVector.push_back(floor(xDaszek + 0.5));
 			}
 		}
 		// usuwamy macierze z pamiêci
@@ -414,6 +411,5 @@ void main()
 	WaveReader wave15("velvet.wav");
 	WaveReader wave16("chanchan.wav");*/
 
-	//wave1.SystemOfEquations();
 	system("pause");
 }
