@@ -4,3 +4,4 @@ Przeciêtna energia sygna³u: 15838569.226852
 Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 361483.382039
 Entropia: 13.831373
 Entropia z danych po skanowaniu ró¿nicowym: 11.164281
+Entropia ze wspó³czynnikiem 10.622207

@@ -40,6 +40,7 @@ private:
 	double ammount_of_samples;
 	const double eps = 1e-12; //wspolczynnik
 	vector <double> xDaszekVector;
+	vector <double> eN;
 
 public:
 	WaveReader(string name_of_wave)
@@ -59,6 +60,7 @@ public:
 		ofstream new_file(name_of_wave + ".txt");
 		ammount_of_samples = ((size_of_file - 48)-2)/ 2; // liczba probek z obu kanalow
 		new_file << name_of_wave << endl;
+		cout << name_of_wave << endl;
 		new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
 
@@ -71,8 +73,8 @@ public:
 		new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
 		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus)) / 2) << endl; // entro dla tych po skalowaniu
 		SystemOfEquations();
-		new_file << "Entropia ze wspó³czynnikiem " << entro_daszek(xDaszekVector)<<endl;
-
+		new_file << "Entropia ze wspó³czynnikiem " << entro_minus(eN)<<endl;
+		
 
 	}
 	 
@@ -204,25 +206,6 @@ public:
 		}
 		return entro *(-1);
 	}
-
-	double entro_daszek(vector<double> a)
-	{
-		double entro = 0;
-		vector <double> buffor(16777216, 0);
-		for (int i = 0; i < a.size(); i++)
-		{
-			buffor.at(a.at(i) + 8388608)++;
-		}
-		for (int i = 0; i < 16777216; i++)
-		{
-			if (buffor.at(i) != 0)
-			{
-				double p_i = (double)buffor.at(i) / a.size();
-				entro = entro + (p_i*log2(p_i));
-			}
-		}
-		return entro *(-1);
-	}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -287,7 +270,7 @@ public:
 		double **A, *B, *X;
 		int n, r, i, j;
 		
-		r = 3;
+		r = 6;
 		n = r;
 
 		cout << setprecision(4) << fixed;
@@ -311,8 +294,8 @@ public:
 		{
 			for (int z = r; z < N; z++)
 			{
-				sum += (left.at(z - i)*left.at(z - j)) + (right.at(z - i) * right.at(z - j)); //suma dla elementów macierzy X
-				sum2 += (left.at(z) * left.at(z - i)) + (right.at(z) * right.at(z - i)); //suma dla elementów macierzy P
+				sum += right.at(z - i) * right.at(z - j); //suma dla elementów macierzy X
+				sum2 += right.at(z) * right.at(z - i); //suma dla elementów macierzy P
 			}
 			a.push_back(sum);
 
@@ -345,21 +328,21 @@ public:
 		}
 
 		//wyswietlamy:
-		for (i = 0; i < n; i++) {
+		/*for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++)
 				cout << A[i][j] << "\t";
 			cout << "\t" << B[i] << endl;
-		}
+		}*/
 
 		// rozwi¹zujemy uk³ad i wyœwietlamy wyniki
 		double sumA = 0;
 		if (ludist(n, A) && lusolve(n, A, B, X))
 		{
 			for (i = 0; i < n; i++) {
-				cout << "a" << i + 1 << " = " << setw(9) << X[i] << endl;
+				/*cout << "a" << i + 1 << " = " << setw(9) << X[i] << endl;*/
 				sumA += X[i];
 			}
-			cout << "Suma wspolczynnikow: " << sumA << endl;
+			/*cout << "Suma wspolczynnikow: " << sumA << endl;*/
 		}
 		else cout << "DZIELNIK ZERO\n";
 
@@ -367,27 +350,54 @@ public:
 		for (int i = 0; i < r; i++) {
 			maleA.push_back(X[i]);
 		}
+		/*vector<double>maleA;
+		maleA.push_back(1);
+		maleA.push_back(0);
+		maleA.push_back(0);*/
 
 		double xDaszek=0;
 		for (size_t i = 0; i < ammount_of_samples/2; i++)
 		{
-			if (i <= r)
+			xDaszek = 0;
+			if (i == 0)
 			{
 				xDaszekVector.push_back(right.at(i));
+			}
+			else if (i <= r)
+			{
+				xDaszekVector.push_back(right.at(i-1));
 			}
 			else {
 				for (size_t j = 0; j < r; j++)
 				{
+
 					xDaszek += maleA.at(j) * right.at(i-j);
 				}
+				if (xDaszek > pow(2, 15) - 1) 
+				{
+					xDaszek = pow(2, 15) - 1;
+				}
+				else if (xDaszek < -pow(2, 15))
+				{
+					xDaszek = -pow(2, 15);
+				}
 				xDaszekVector.push_back(floor(xDaszek + 0.5));
+				
 			}
 		}
+		
+
+		for (int i = 0;i<ammount_of_samples/2;i++) 
+		{
+			eN.push_back(right.at(i) - xDaszekVector.at(i));
+		}
+
 		// usuwamy macierze z pamiêci
 		for (i = 0; i < n; i++) delete[] A[i];
 		delete[] A;
 		delete[] B;
 		delete[] X;
+
 	}
 
 };
@@ -395,7 +405,7 @@ public:
 void main()
 {
 	WaveReader wave1("ATrain.wav");
-	/*WaveReader wave2("BeautySlept.wav");
+	WaveReader wave2("BeautySlept.wav");
 	WaveReader wave3("death2.wav");
 	WaveReader wave4("experiencia.wav");
 	WaveReader wave5("female_speech.wav");
@@ -409,7 +419,7 @@ void main()
 	WaveReader wave13("thear1.wav");
 	WaveReader wave14("TomsDiner.wav");
 	WaveReader wave15("velvet.wav");
-	WaveReader wave16("chanchan.wav");*/
+	WaveReader wave16("chanchan.wav");
 
 	system("pause");
 }
