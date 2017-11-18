@@ -31,21 +31,23 @@ private:
 	FOURCC data; // "data" description header
 	DWORD size_of_data; // size of data chunk
 	INT16 data_of_file;
-	vector<INT16> left;
-	vector<double> left_minus;
-	vector<INT16> right;
-	vector<double> right_minus;
+	vector< vector<double> >canals;
+	vector< vector<double> >canalsMinus;
 	ofstream new_file;
 	FILE *wf;
 	double ammount_of_samples;
 	const double eps = 1e-12; //wspolczynnik
 	vector <double> xDaszekVector;
-	vector <double> eN;
+	vector <double> errorN;
+	vector<double>valuesofA;
 
 public:
 	WaveReader(string name_of_wave)
 	{
-		
+		canals.push_back(vector<double>());
+		canals.push_back(vector<double>());
+		canalsMinus.push_back(vector<double>());
+		canalsMinus.push_back(vector<double>());
 		const char * c = name_of_wave.c_str();
 		wf = fopen(c, "rb");
 
@@ -64,16 +66,16 @@ public:
 		new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
 
-		double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
+		double d = ((first_calculation(ammount_of_samples / 2, canals[0]) + first_calculation(ammount_of_samples / 2, canals[1])) / 2);
 		new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
 		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
-		d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
+		d = ((first_calculation(ammount_of_samples / 2, canalsMinus[0]) + first_calculation(ammount_of_samples / 2, canalsMinus[1])) / 2);
 		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
 		
-		new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
-		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus)) / 2) << endl; // entro dla tych po skalowaniu
+		new_file << "Entropia: " << ((entropy(canals[0]) + entropy(canals[1])) / 2) << endl; // entro dla normalnych
+		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entropy(canalsMinus[0]) + entropy(canalsMinus[1])) / 2) << endl; // entro dla tych po skalowaniu
 		SystemOfEquations();
-		new_file << "Entropia ze wspó³czynnikiem " << entro_minus(eN)<<endl;
+		new_file << "Entropia ze wspó³czynnikiem " << entropy(errorN)<<endl;
 		
 
 	}
@@ -108,37 +110,37 @@ public:
 			fread(&data_of_file, sizeof(INT16), 1, wf);
 			if (i % 2 == 0)
 			{
-				left.push_back(data_of_file);
+				canals[0].push_back(data_of_file);
 			}
 			else
 			{
-				right.push_back(data_of_file);
+				canals[1].push_back(data_of_file);
 			}
 		}
 	}
 
 	void minus_vectors() // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
 	{
-		for (int i = 0; i < left.size(); i++)
+		for (int i = 0; i < canals[0].size(); i++)
 		{
 			if (i == 0)
 			{
-				left_minus.push_back (left.at(i));
+				canalsMinus[0].push_back (canals[0].at(i));
 			}
 			else
 			{
-				left_minus.push_back (left.at(i) - left.at(i - 1));
+				canalsMinus[0].push_back (canals[0].at(i) - canals[0].at(i - 1));
 			}
 		}
-		for (int i = 0; i < right.size(); i++)
+		for (int i = 0; i < canals[1].size(); i++)
 		{
 			if (i == 0)
 			{
-				right_minus.push_back(right.at(i));
+				canalsMinus[1].push_back(canals[1].at(i));
 			}
 			else
 			{
-				right_minus.push_back(right.at(i) - right.at(i - 1));
+				canalsMinus[1].push_back(canals[1].at(i) - canals[1].at(i - 1));
 			}
 		}
 	}
@@ -156,7 +158,7 @@ public:
 		return full;
 	}
 
-	double first_calculation_minus(double a, vector<double> b) // funkcje x_minus to te same funkcje co wyzej tylko przymujace inny typ danych
+	double first_calculation(double a, vector<double> b) // funkcje x_minus to te same funkcje co wyzej tylko przymujace inny typ danych
 	{
 		double full = 0;
 		for (INT32 i = 0; i < a; i++)
@@ -169,9 +171,9 @@ public:
 		return full;
 	}
 
-	double entro(vector<INT16> a) // obliczanie entropi
+	double entropy(vector<INT16> a) // obliczanie entropi
 	{
-		double entro = 0;
+		double entropy = 0;
 		vector <double> buffor(131072, 0); // vector przetrzymujacy 2^17 miejsc
 		for (int i = 0; i < a.size(); i++)
 		{
@@ -182,15 +184,15 @@ public:
 			if (buffor.at(i) != 0) // jezeli probka sie nie pojawila i jest 0 to nie mozemy jej uzyc, bo logarytm wywali nand
 			{
 				double p_i = (double)buffor.at(i) / a.size();
-				entro = entro + (p_i*log2(p_i));
+				entropy = entropy + (p_i*log2(p_i));
 			}
 		}
-		return entro *(-1);
+		return entropy *(-1);
 	}
 
-	double entro_minus(vector<double> a)
+	double entropy(vector<double> a)
 	{
-		double entro = 0;
+		double entropy = 0;
 		vector <double> buffor(131072, 0);
 		for (int i = 0; i < a.size(); i++)
 		{
@@ -201,10 +203,10 @@ public:
 			if (buffor.at(i) != 0)
 			{
 				double p_i = (double)buffor.at(i) / a.size();
-				entro = entro + (p_i*log2(p_i));
+				entropy = entropy + (p_i*log2(p_i));
 			}
 		}
-		return entro *(-1);
+		return entropy *(-1);
 	}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,18 +215,25 @@ public:
 	// Funkcja dokonuje rozk³adu LU macierzy A
 	bool ludist(int n, double ** A)
 	{
-		int i, j, k;
-
-		for (k = 0; k < n - 1; k++)
+		for (int k = 0; k < n - 1; k++)
 		{
-			if (fabs(A[k][k]) < eps) return false;
+			if (fabs(A[k][k]) < eps)
+			{
+				return false;
+			}
 
-			for (i = k + 1; i < n; i++)
+			for (int i = k + 1; i < n; i++)
+			{
 				A[i][k] /= A[k][k];
+			}
 
-			for (i = k + 1; i < n; i++)
-				for (j = k + 1; j < n; j++)
+			for (int i = k + 1; i < n; i++)
+			{
+				for (int j = k + 1; j < n; j++)
+				{
 					A[i][j] -= A[i][k] * A[k][j];
+				}
+			}
 		}
 
 		return true;
@@ -233,7 +242,7 @@ public:
 	// Funkcja wyznacza wektor X na podstawie A i B
 	bool lusolve(int n, double ** A, double * B, double * X)
 	{
-		int    i, j;
+		int i, j;
 		double s;
 
 		X[0] = B[0];
@@ -242,12 +251,17 @@ public:
 		{
 			s = 0;
 
-			for (j = 0; j < i; j++) s += A[i][j] * X[j];
-
+			for (j = 0; j < i; j++)
+			{
+				s += A[i][j] * X[j];
+			}
 			X[i] = B[i] - s;
 		}
 
-		if (fabs(A[n - 1][n - 1]) < eps) return false;
+		if (fabs(A[n - 1][n - 1]) < eps)
+		{
+			return false;
+		}
 
 		X[n - 1] /= A[n - 1][n - 1];
 
@@ -255,10 +269,15 @@ public:
 		{
 			s = 0;
 
-			for (j = i + 1; j < n; j++) s += A[i][j] * X[j];
+			for (j = i + 1; j < n; j++)
+			{
+				s += A[i][j] * X[j];
+			}
 
-			if (fabs(A[i][i]) < eps) return false;
-
+			if (fabs(A[i][i]) < eps)
+			{
+				return false;
+			}
 			X[i] = (X[i] - s) / A[i][i];
 		}
 
@@ -266,7 +285,8 @@ public:
 	}
 
 	
-	void SystemOfEquations() {
+	void SystemOfEquations()
+	{
 		double **A, *B, *X;
 		int n, r, i, j;
 		
@@ -280,8 +300,10 @@ public:
 		B = new double[n];
 		X = new double[n];
 
-		for (i = 0; i < n; i++) 
+		for (i = 0; i < n; i++)
+		{
 			A[i] = new double[n];
+		}
 
 		int N = ammount_of_samples/2; //dla jednego kanalu
 		j = 1;
@@ -294,8 +316,8 @@ public:
 		{
 			for (int z = r; z < N; z++)
 			{
-				sum += right.at(z - i) * right.at(z - j); //suma dla elementów macierzy X
-				sum2 += right.at(z) * right.at(z - i); //suma dla elementów macierzy P
+				sum += canals[1].at(z - i) * canals[1].at(z - j); //suma dla elementów macierzy X
+				sum2 += canals[1] .at(z) * canals[1].at(z - i); //suma dla elementów macierzy P
 			}
 			a.push_back(sum);
 
@@ -314,8 +336,8 @@ public:
 
 		int licznik=0;
 		j = 0;
-		for (i = 0; i < n; i++){
-			
+		for (i = 0; i < n; i++)
+		{
 			A[i][j] = a.at(licznik); // Macierz X (3x3)
 			licznik++;
 			B[i] = b.at(i); // Macierz P (3x1)
@@ -327,33 +349,22 @@ public:
 			}
 		}
 
-		//wyswietlamy:
-		/*for (i = 0; i < n; i++) {
-			for (j = 0; j < n; j++)
-				cout << A[i][j] << "\t";
-			cout << "\t" << B[i] << endl;
-		}*/
-
 		// rozwi¹zujemy uk³ad i wyœwietlamy wyniki
 		double sumA = 0;
 		if (ludist(n, A) && lusolve(n, A, B, X))
 		{
-			for (i = 0; i < n; i++) {
-				/*cout << "a" << i + 1 << " = " << setw(9) << X[i] << endl;*/
+			for (i = 0; i < n; i++) 
+			{
 				sumA += X[i];
 			}
-			/*cout << "Suma wspolczynnikow: " << sumA << endl;*/
 		}
 		else cout << "DZIELNIK ZERO\n";
 
-		vector<double>maleA;
-		for (int i = 0; i < r; i++) {
-			maleA.push_back(X[i]);
+		
+		for (int i = 0; i < r; i++)
+		{
+			valuesofA.push_back(X[i]);
 		}
-		/*vector<double>maleA;
-		maleA.push_back(1);
-		maleA.push_back(0);
-		maleA.push_back(0);*/
 
 		double xDaszek=0;
 		for (size_t i = 0; i < ammount_of_samples/2; i++)
@@ -361,17 +372,17 @@ public:
 			xDaszek = 0;
 			if (i == 0)
 			{
-				xDaszekVector.push_back(right.at(i));
+				xDaszekVector.push_back(canals[1].at(i));
 			}
 			else if (i <= r)
 			{
-				xDaszekVector.push_back(right.at(i-1));
+				xDaszekVector.push_back(canals[1].at(i-1));
 			}
-			else {
+			else
+			{
 				for (size_t j = 0; j < r; j++)
 				{
-
-					xDaszek += maleA.at(j) * right.at(i-j);
+					xDaszek += valuesofA.at(j) * canals[1].at(i-j);
 				}
 				if (xDaszek > pow(2, 15) - 1) 
 				{
@@ -382,24 +393,23 @@ public:
 					xDaszek = -pow(2, 15);
 				}
 				xDaszekVector.push_back(floor(xDaszek + 0.5));
-				
 			}
 		}
-		
 
 		for (int i = 0;i<ammount_of_samples/2;i++) 
 		{
-			eN.push_back(right.at(i) - xDaszekVector.at(i));
+			errorN.push_back(canals[1].at(i) - xDaszekVector.at(i));
 		}
 
 		// usuwamy macierze z pamiêci
-		for (i = 0; i < n; i++) delete[] A[i];
+		for (i = 0; i < n; i++)
+		{
+			delete[] A[i];
+		}
 		delete[] A;
 		delete[] B;
 		delete[] X;
-
 	}
-
 };
 
 void main()
@@ -420,6 +430,5 @@ void main()
 	WaveReader wave14("TomsDiner.wav");
 	WaveReader wave15("velvet.wav");
 	WaveReader wave16("chanchan.wav");
-
 	system("pause");
 }
