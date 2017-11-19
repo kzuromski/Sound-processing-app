@@ -31,21 +31,19 @@ private:
 	FOURCC data; // "data" description header
 	DWORD size_of_data; // size of data chunk
 	INT16 data_of_file;
-	vector< vector<double> >canals;
+	vector< vector<INT16> >canals;
 	vector< vector<double> >canalsMinus;
+	vector <double> errorN;
 	ofstream new_file;
 	FILE *wf;
 	double ammount_of_samples;
 	const double eps = 1e-12; //wspolczynnik
-	vector <double> xDaszekVector;
-	vector <double> errorN;
-	vector<double>valuesofA;
 
 public:
 	WaveReader(string name_of_wave)
 	{
-		canals.push_back(vector<double>());
-		canals.push_back(vector<double>());
+		canals.push_back(vector<INT16>());
+		canals.push_back(vector<INT16>());
 		canalsMinus.push_back(vector<double>());
 		canalsMinus.push_back(vector<double>());
 		const char * c = name_of_wave.c_str();
@@ -76,8 +74,6 @@ public:
 		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entropy(canalsMinus[0]) + entropy(canalsMinus[1])) / 2) << endl; // entro dla tych po skalowaniu
 		SystemOfEquations();
 		new_file << "Entropia ze wspó³czynnikiem " << entropy(errorN)<<endl;
-		
-
 	}
 	 
 	~WaveReader()
@@ -235,7 +231,6 @@ public:
 				}
 			}
 		}
-
 		return true;
 	}
 
@@ -280,53 +275,51 @@ public:
 			}
 			X[i] = (X[i] - s) / A[i][i];
 		}
-
 		return true;
 	}
 
 	
 	void SystemOfEquations()
 	{
-		double **A, *B, *X;
-		int n, r, i, j;
-		
-		r = 6;
-		n = r;
-
-		cout << setprecision(4) << fixed;
-
-		// tworzymy macierze A, B i X
+		int i, j;
+		int r = 6;
+		int n = r;
+		double **A, *B, *X; // tworzymy macierze A, B i X
 		A = new double *[n];
 		B = new double[n];
 		X = new double[n];
+		double sumOfX = 0; //zerowanie sumy
+		double sumOfP = 0;
+		vector<double>valuesOfX; //wektor dla macierzy X
+		vector<double>valuesOfP; //wektor dla macierzy P
+		int N = ammount_of_samples / 2; //Iloœæ sampli dla jednego kana³u
+		double xDaszek = 0;
+		vector <double> xDaszekVector;
+		vector<double>valuesofA;
+		int licznik = 0;
+		
+		cout << setprecision(4) << fixed;
+
+	
 
 		for (i = 0; i < n; i++)
 		{
 			A[i] = new double[n];
 		}
-
-		int N = ammount_of_samples/2; //dla jednego kanalu
+		
 		j = 1;
-		double sum = 0; //zerowanie sumy
-		double sum2 = 0;
-		vector<double>a; //wektor dla macierzy X
-		vector<double>b; //wektor dla macierzy P
 
 		for (i = 1; i <= r; i++)
 		{
 			for (int z = r; z < N; z++)
 			{
-				sum += canals[1].at(z - i) * canals[1].at(z - j); //suma dla elementów macierzy X
-				sum2 += canals[1] .at(z) * canals[1].at(z - i); //suma dla elementów macierzy P
+				sumOfX += canals[1].at(z - i) * canals[1].at(z - j); //Suma dla elementów macierzy X
+				sumOfP += canals[1] .at(z) * canals[1].at(z - i); //Suma dla elementów macierzy P
 			}
-			a.push_back(sum);
-
-			if (j == 1)
-			{
-				b.push_back(sum2);
-			}
-			sum = 0;
-			sum2 = 0;
+			valuesOfX.push_back(sumOfX);
+			valuesOfP.push_back(sumOfP);
+			sumOfX = 0;
+			sumOfP = 0;
 			if (i == r && j != r)
 			{
 				j++;
@@ -334,13 +327,12 @@ public:
 			}
 		}
 
-		int licznik=0;
 		j = 0;
 		for (i = 0; i < n; i++)
 		{
-			A[i][j] = a.at(licznik); // Macierz X (3x3)
+			A[i][j] = valuesOfX.at(licznik); // Macierz X (3x3)
 			licznik++;
-			B[i] = b.at(i); // Macierz P (3x1)
+			B[i] = valuesOfP.at(i); // Macierz P (3x1)
 		
 			if (i == n-1 && j != n-1)
 			{
@@ -366,7 +358,6 @@ public:
 			valuesofA.push_back(X[i]);
 		}
 
-		double xDaszek=0;
 		for (size_t i = 0; i < ammount_of_samples/2; i++)
 		{
 			xDaszek = 0;
@@ -414,6 +405,8 @@ public:
 
 void main()
 {
+	clock_t start = clock();
+	cout << "Przetwarzanie plikow: " << endl;
 	WaveReader wave1("ATrain.wav");
 	WaveReader wave2("BeautySlept.wav");
 	WaveReader wave3("death2.wav");
@@ -430,5 +423,6 @@ void main()
 	WaveReader wave14("TomsDiner.wav");
 	WaveReader wave15("velvet.wav");
 	WaveReader wave16("chanchan.wav");
+	cout << "Czas dzia³ania programu(w sekundach): " << (clock() - start)/CLOCKS_PER_SEC << endl;
 	system("pause");
 }
