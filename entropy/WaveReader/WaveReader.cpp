@@ -34,7 +34,7 @@ private:
 	vector< vector<INT16> >canals;
 	vector< vector<double> >canalsMinus;
 	vector< vector<double> > xDaszekVector;
-	double xDaszek = 0;
+	double xDaszek;
 	vector <double> errorN;
 	ofstream new_file;
 	FILE *wf;
@@ -340,7 +340,6 @@ public:
 		vector<double>valuesOfX; //wektor dla macierzy X
 		vector<double>valuesOfP; //wektor dla macierzy P
 		int N = ammount_of_samples / 2; //Iloœæ sampli dla jednego kana³u
-
 		vector<double>valuesofA;
 		int licznik = 0;
 		
@@ -388,8 +387,11 @@ public:
 		}
 		else cout << "DZIELNIK ZERO\n";
 
-		vector<double> errorN1 = calculateError(valuesofA, X, 0, 10);
-		vector<double> errorN2 = calculateError(valuesofA, X, 1, 10);
+		xDaszekVector.push_back(vector<double>());
+		xDaszekVector.push_back(vector<double>());
+
+		vector<double> errorN1 = calculateError(valuesofA, X, 0, r);
+		vector<double> errorN2 = calculateError(valuesofA, X, 1, r);
 
 		for (int i = 0; i < ammount_of_samples/2; i++)
 		{
