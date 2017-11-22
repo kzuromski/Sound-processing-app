@@ -33,6 +33,8 @@ private:
 	INT16 data_of_file;
 	vector< vector<INT16> >canals;
 	vector< vector<double> >canalsMinus;
+	vector< vector<double> > xDaszekVector;
+	double xDaszek = 0;
 	vector <double> errorN;
 	ofstream new_file;
 	FILE *wf;
@@ -42,6 +44,7 @@ private:
 public:
 	WaveReader(string name_of_wave)
 	{
+		clock_t start = clock();
 		canals.push_back(vector<INT16>());
 		canals.push_back(vector<INT16>());
 		canalsMinus.push_back(vector<double>());
@@ -74,6 +77,7 @@ public:
 		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entropy(canalsMinus[0]) + entropy(canalsMinus[1])) / 2) << endl; // entro dla tych po skalowaniu
 		SystemOfEquations();
 		new_file << "Entropia ze wspó³czynnikiem " << entropy(errorN)<<endl;
+		cout << "Czas dziaania programu dla pliku(w sekundach): " << (clock() - start) / CLOCKS_PER_SEC << endl;
 	}
 	 
 	~WaveReader()
@@ -278,6 +282,49 @@ public:
 		return true;
 	}
 
+	vector<double> calculateError(vector<double> valuesofA, double * X, int canal, int r)
+	{
+		for (int i = 0; i < r; i++)
+		{
+			valuesofA.push_back(X[i]);
+		}
+
+		for (size_t i = 0; i < ammount_of_samples / 2; i++)
+		{
+			xDaszek = 0;
+			if (i == 0)
+			{
+				xDaszekVector[canal].push_back(canals[canal].at(i));
+			}
+			else if (i <= r)
+			{
+				xDaszekVector[canal].push_back(canals[canal].at(i - 1));
+			}
+			else
+			{
+				for (size_t j = 0; j < r; j++)
+				{
+					xDaszek += valuesofA.at(j) * canals[canal].at(i - j);
+				}
+				if (xDaszek > pow(2, 15) - 1)
+				{
+					xDaszek = pow(2, 15) - 1;
+				}
+				else if (xDaszek < -pow(2, 15))
+				{
+					xDaszek = -pow(2, 15);
+				}
+				xDaszekVector[canal].push_back(floor(xDaszek + 0.5));
+			}
+		}
+
+		for (int i = 0; i<ammount_of_samples / 2; i++)
+		{
+			errorN.push_back(canals[canal].at(i) - xDaszekVector[canal].at(i));
+		}
+		return errorN;
+	}
+
 	
 	void SystemOfEquations()
 	{
@@ -293,53 +340,42 @@ public:
 		vector<double>valuesOfX; //wektor dla macierzy X
 		vector<double>valuesOfP; //wektor dla macierzy P
 		int N = ammount_of_samples / 2; //Iloœæ sampli dla jednego kana³u
-		double xDaszek = 0;
-		vector <double> xDaszekVector;
+
 		vector<double>valuesofA;
 		int licznik = 0;
 		
 		cout << setprecision(4) << fixed;
-
-	
-
 		for (i = 0; i < n; i++)
 		{
 			A[i] = new double[n];
 		}
-		
-		j = 1;
 
-		for (i = 1; i <= r; i++)
+		for (j = 1; j <= r; j++)
 		{
-			for (int z = r; z < N; z++)
+			for (i = 1; i <= r; i++)
 			{
-				sumOfX += canals[1].at(z - i) * canals[1].at(z - j); //Suma dla elementów macierzy X
-				sumOfP += canals[1] .at(z) * canals[1].at(z - i); //Suma dla elementów macierzy P
-			}
-			valuesOfX.push_back(sumOfX);
-			valuesOfP.push_back(sumOfP);
-			sumOfX = 0;
-			sumOfP = 0;
-			if (i == r && j != r)
-			{
-				j++;
-				i = 0;
+				for (int z = r; z < N; z++)
+				{
+					sumOfX += canals[1].at(z - i) * canals[1].at(z - j); //Suma dla elementów macierzy X
+					sumOfP += canals[1].at(z) * canals[1].at(z - i); //Suma dla elementów macierzy P
+				}
+				valuesOfX.push_back(sumOfX);
+				valuesOfP.push_back(sumOfP);
+				sumOfX = 0;
+				sumOfP = 0;
 			}
 		}
-
-		j = 0;
-		for (i = 0; i < n; i++)
-		{
-			A[i][j] = valuesOfX.at(licznik); // Macierz X (3x3)
-			licznik++;
-			B[i] = valuesOfP.at(i); // Macierz P (3x1)
 		
-			if (i == n-1 && j != n-1)
+		for (j = 0; j < n; j++)
+		{
+			for (i = 0; i < n; i++)
 			{
-				i = -1;
-				j++;
+				A[i][j] = valuesOfX.at(licznik); // Macierz X (3x3)
+				licznik++;
+				B[i] = valuesOfP.at(i); // Macierz P (3x1)
 			}
 		}
+		
 
 		// rozwi¹zujemy uk³ad i wyœwietlamy wyniki
 		double sumA = 0;
@@ -352,44 +388,12 @@ public:
 		}
 		else cout << "DZIELNIK ZERO\n";
 
-		
-		for (int i = 0; i < r; i++)
-		{
-			valuesofA.push_back(X[i]);
-		}
+		vector<double> errorN1 = calculateError(valuesofA, X, 0, 10);
+		vector<double> errorN2 = calculateError(valuesofA, X, 1, 10);
 
-		for (size_t i = 0; i < ammount_of_samples/2; i++)
+		for (int i = 0; i < ammount_of_samples/2; i++)
 		{
-			xDaszek = 0;
-			if (i == 0)
-			{
-				xDaszekVector.push_back(canals[1].at(i));
-			}
-			else if (i <= r)
-			{
-				xDaszekVector.push_back(canals[1].at(i-1));
-			}
-			else
-			{
-				for (size_t j = 0; j < r; j++)
-				{
-					xDaszek += valuesofA.at(j) * canals[1].at(i-j);
-				}
-				if (xDaszek > pow(2, 15) - 1) 
-				{
-					xDaszek = pow(2, 15) - 1;
-				}
-				else if (xDaszek < -pow(2, 15))
-				{
-					xDaszek = -pow(2, 15);
-				}
-				xDaszekVector.push_back(floor(xDaszek + 0.5));
-			}
-		}
-
-		for (int i = 0;i<ammount_of_samples/2;i++) 
-		{
-			errorN.push_back(canals[1].at(i) - xDaszekVector.at(i));
+			errorN.at(i) = (errorN1.at(i) + errorN2.at(i))/2;
 		}
 
 		// usuwamy macierze z pamiêci
