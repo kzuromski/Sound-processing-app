@@ -1,7 +1,1 @@
 thear1.wav
-Liczba próbek z obu kana³ów: 1703930.000000
-Przeciêtna energia sygna³u: 79263721.408281
-Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 4073803.784406
-Entropia: 15.100598
-Entropia z danych po skanowaniu ró¿nicowym: 12.970792
-Entropia ze wspó³czynnikiem 11.942791

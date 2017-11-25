@@ -7,6 +7,7 @@
 #include <iomanip>
 using namespace std;
 
+int r;
 class WaveReader
 {
 private:
@@ -35,12 +36,11 @@ private:
 	vector <double> xDaszekVector;
 	vector <double> eN;
 	double average;
-	int r;
 
 public:
 	WaveReader(string name_of_wave)
 	{
-		cout << name_of_wave << endl;
+		//cout << name_of_wave << endl;
 		const char * c = name_of_wave.c_str();
 		wf = fopen(c, "rb");
 
@@ -51,23 +51,23 @@ public:
 		}
 		ReadData();
 
-		ofstream new_file(name_of_wave + ".txt");
+		//ofstream new_file(name_of_wave + ".txt");
 		ammount_of_samples = ((size_of_file - 48)-2)/ 2; // liczba probek z obu kanalow
-		new_file << name_of_wave << endl;
-		new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
+		//new_file << name_of_wave << endl;
+		//new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
 
-		double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
-		new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
-		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
-		d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
-		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
-		
-		new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
-		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus))/2) << endl; // entro dla tych po skalowaniu
+		//double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
+		//new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
+		//minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
+		//d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
+		//new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
+		//
+		//new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
+		//new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus))/2) << endl; // entro dla tych po skalowaniu
 		SystemOfEquations();
 		average = entro_minus(eN);
-		new_file << "Entropia ze wspó³czynnikiem " << average <<endl;
+		//new_file << "Entropia ze wspó³czynnikiem " << average <<endl;
 
 	}
 	 
@@ -78,10 +78,6 @@ public:
 
 	double getAverage() {
 		return average;
-	}
-
-	int getR() {
-		return r;
 	}
 
 	void ReadData() //czytanie danych
@@ -266,8 +262,6 @@ public:
 	void SystemOfEquations() {
 		double **A, *B, *X;
 		int n, i, j;
-		
-		r = 3;
 		n = r;
 
 		cout << setprecision(4) << fixed;
@@ -366,7 +360,7 @@ public:
 
 };
 
-void main()
+double start()
 {
 	WaveReader wave1("ATrain.wav");
 	WaveReader wave2("BeautySlept.wav");
@@ -387,7 +381,7 @@ void main()
 
 	double tab[16];
 	double average = 0;
-	
+
 	tab[0] = wave1.getAverage();
 	tab[1] = wave2.getAverage();
 	tab[2] = wave3.getAverage();
@@ -404,13 +398,26 @@ void main()
 	tab[13] = wave14.getAverage();
 	tab[14] = wave15.getAverage();
 	tab[15] = wave16.getAverage();
-	
+
 	for (int i = 0; i < 16; i++) {
 		average += tab[i];
 	}
 	average /= 16;
+	return average;
+}
+void main()
+{
+	r = 10;
 
-	//ofstream averageFile("average.txt", ios::app);
-	//averageFile << wave1.getR() << " " << average << endl;
+	for (int i = 10; i < 30; i+10)
+	{
+		cout <<"r=" << r << endl;
+		
+		ofstream averageFile("average"+ std::to_string(r) +".txt", ios::app);
+		averageFile << r << " " << start() << endl;
+		r=r+i;
+	}
+
+	
 	system("pause");
 }

@@ -1,7 +1,1 @@
 experiencia.wav
-Liczba próbek z obu kana³ów: 1764588.000000
-Przeciêtna energia sygna³u: 54135234.797000
-Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 4055992.187795
-Entropia: 14.831846
-Entropia z danych po skanowaniu ró¿nicowym: 12.680255
-Entropia ze wspó³czynnikiem 12.161031

@@ -1,7 +1,1 @@
 velvet.wav
-Liczba próbek z obu kana³ów: 1047684.000000
-Przeciêtna energia sygna³u: 53783918.432493
-Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 7136274.212215
-Entropia: 13.828819
-Entropia z danych po skanowaniu ró¿nicowym: 11.842294
-Entropia ze wspó³czynnikiem 12.013982
