@@ -4,7 +4,9 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cmath>
 #include <iomanip>
+#include <algorithm>
 using namespace std;
 
 class WaveReader
@@ -32,8 +34,10 @@ private:
 	FILE *wf;
 	double ammount_of_samples;
 	const double eps = 1e-12; //wspolczynnik
+
 	vector <double> xDaszekVector;
 	vector <double> eN;
+	vector<double>maleA;
 	double average;
 	int r;
 
@@ -68,6 +72,7 @@ public:
 		SystemOfEquations();
 		average = entro_minus(eN);
 		new_file << "Entropia ze wspó³czynnikiem " << average <<endl;
+		EntroBit();
 
 	}
 	 
@@ -267,7 +272,7 @@ public:
 		double **A, *B, *X;
 		int n, i, j;
 		
-		r = 3;
+		r = 15;
 		n = r;
 
 		cout << setprecision(4) << fixed;
@@ -319,7 +324,7 @@ public:
 		if (ludist(n, A) && lusolve(n, A, B, X)){}
 		else cout << "DZIELNIK ZERO\n";
 
-		vector<double>maleA;
+		
 		for (int i = 0; i < r; i++) {
 			maleA.push_back(X[i]);
 		}
@@ -364,12 +369,29 @@ public:
 		delete[] X;
 	}
 
+	void EntroBit() {
+
+		for (int i = 0; i < maleA.size(); i++) {
+			cout << maleA.at(i) << endl;
+		}
+		auto max = max_element(begin(maleA), end(maleA));
+		auto min = min_element(begin(maleA), end(maleA));
+
+		if (abs(*min) > *max)
+			*max = *min;
+
+		auto position = distance(begin(maleA), max);
+		cout << "max " << *max << endl;
+		cout << "position " << position << endl;
+		cout << endl;
+	}
+
 };
 
 void main()
 {
 	WaveReader wave1("ATrain.wav");
-	WaveReader wave2("BeautySlept.wav");
+	/*WaveReader wave2("BeautySlept.wav");
 	WaveReader wave3("death2.wav");
 	WaveReader wave4("experiencia.wav");
 	WaveReader wave5("chanchan.wav");
@@ -408,7 +430,7 @@ void main()
 	for (int i = 0; i < 16; i++) {
 		average += tab[i];
 	}
-	average /= 16;
+	average /= 16;*/
 
 	//ofstream averageFile("average.txt", ios::app);
 	//averageFile << wave1.getR() << " " << average << endl;
