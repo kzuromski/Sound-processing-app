@@ -407,15 +407,13 @@ double start()
 }
 void main()
 {
-	r = 10;
 
-	for (int i = 10; i < 30; i+10)
+	for (r=2; r < 10; r++)
 	{
 		cout <<"r=" << r << endl;
 		
-		ofstream averageFile("average"+ std::to_string(r) +".txt", ios::app);
+		ofstream averageFile("average_test.txt", ios::app);
 		averageFile << r << " " << start() << endl;
-		r=r+i;
 	}
 
 	
