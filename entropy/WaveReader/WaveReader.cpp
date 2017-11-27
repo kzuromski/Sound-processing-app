@@ -39,7 +39,8 @@ private:
 	vector <double> eN;
 	vector<double>maleA;
 	double average;
-	int r;
+	int r = 3;
+	int b = 22;
 
 public:
 	WaveReader(string name_of_wave)
@@ -61,14 +62,14 @@ public:
 		new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 		normal_vectors(); // wektory wypelniane danymi
 
-		double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
-		new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
-		minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
-		d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
-		new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
-		
-		new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
-		new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus))/2) << endl; // entro dla tych po skalowaniu
+		//double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
+		//new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
+		//minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
+		//d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
+		//new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
+		//
+		//new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
+		//new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((entro_minus(left_minus) + entro_minus(right_minus))/2) << endl; // entro dla tych po skalowaniu
 		SystemOfEquations();
 		average = entro_minus(eN);
 		new_file << "Entropia ze wspó³czynnikiem " << average <<endl;
@@ -272,10 +273,9 @@ public:
 		double **A, *B, *X;
 		int n, i, j;
 		
-		r = 15;
 		n = r;
 
-		cout << setprecision(4) << fixed;
+		cout << setprecision(15) << fixed;
 
 		// tworzymy macierze A, B i X
 		A = new double *[n];
@@ -329,7 +329,7 @@ public:
 			maleA.push_back(X[i]);
 		}
 
-		double xDaszek=0;
+		/*double xDaszek=0;
 		for (size_t i = 0; i < ammount_of_samples/2; i++)
 		{
 			xDaszek = 0;
@@ -360,7 +360,7 @@ public:
 		for (int i = 0; i<ammount_of_samples / 2; i++)
 		{
 			eN.push_back((right.at(i)+left.at(i))/2 - xDaszekVector.at(i));
-		}
+		}*/
 
 		// usuwamy macierze z pamiêci
 		for (i = 0; i < n; i++) delete[] A[i];
@@ -369,23 +369,58 @@ public:
 		delete[] X;
 	}
 
-	void EntroBit() {
-
-		for (int i = 0; i < maleA.size(); i++) {
-			cout << maleA.at(i) << endl;
-		}
-		auto max = max_element(begin(maleA), end(maleA));
-		auto min = min_element(begin(maleA), end(maleA));
-
-		if (abs(*min) > *max)
-			*max = *min;
-
-		auto position = distance(begin(maleA), max);
-		cout << "max " << *max << endl;
-		cout << "position " << position << endl;
-		cout << endl;
+	bool sign(double a){
+		if (a >= 0)
+			return 1;
+		else
+			return 0;
 	}
 
+	void EntroBit() {
+
+		auto max = max_element(begin(maleA), end(maleA));
+		auto min = min_element(begin(maleA), end(maleA));
+		auto position = 0; 
+
+		bool positive = true;
+		if (abs(*min) > *max) {
+			position = distance(begin(maleA), min);
+			*max = abs(*min); //tutaj mialem do maxa przypisywac dodatania wartosc czy ujemna? chyba dodatnai i nizej znak zapisac
+			positive = false; //cos bylo z zapisywaniem znaku maxa ale nie wiem po co xD
+		}
+		else {
+			position = distance(begin(maleA), max); //po co mi ta pozycja max
+		}
+
+		*max = float(*max); //o co chodzi z tym naglowkiem -->
+		vector<double>aDaszek; //HAHAH DASZEK TFU
+		vector<int>si;
+		for (int i = 0; i < maleA.size(); i++) {
+			aDaszek.push_back(floor(abs(maleA.at(i))/(*max) * (pow(2, b) - 1) + 1/2));
+			si.push_back(sign(maleA.at(i)));
+		}
+
+		double Lsr;
+		double minLsr = 100;
+		int diagramBit = 0;
+		//lsr rosnie wraz z B, a na wykresie jest odwrotnie chyba to trzeba jakos powiazac z decodem
+		for (b = 8; b <= 24; b++) {
+			Lsr = ((entro(left) + entro(right)) / 2) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
+			if (minLsr > Lsr) {
+				minLsr = Lsr;
+				diagramBit = b;
+			}
+		}
+
+		//do czego mi ten decod i dlaczego to ma prawie identyczne wartosci jak nasz wspolczynnik maleA
+		vector<double>decod;
+		for (int i = 0; i < maleA.size(); i++) {
+			decod.push_back((aDaszek.at(i) / (pow(2, b) - 1) * (*max)) * (si.at(i) * 2 - 1));
+		}
+
+		//zapisuje do wykresu diagramBit oraz r, tylko co z decodem i diagramBit ³apie najni¿szy bit zamiast najwy¿szego jak na wykresie
+
+	}
 };
 
 void main()
