@@ -1,7 +1,3 @@
 death2.wav
 Liczba próbek z obu kana³ów: 1652746.000000
-Przeciêtna energia sygna³u: 61346441.926340
-Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 1623003.679149
-Entropia: 14.540730
-Entropia z danych po skanowaniu ró¿nicowym: 10.056347
-Entropia ze wspó³czynnikiem 10.249892
+Entropia ze wspó³czynnikiem 9.234884

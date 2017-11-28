@@ -40,7 +40,6 @@ private:
 	vector<double>maleA;
 	double average;
 	int r = 3;
-	int b = 22;
 
 public:
 	WaveReader(string name_of_wave)
@@ -275,7 +274,7 @@ public:
 		
 		n = r;
 
-		cout << setprecision(15) << fixed;
+		cout << setprecision(25) << fixed;
 
 		// tworzymy macierze A, B i X
 		A = new double *[n];
@@ -329,16 +328,16 @@ public:
 			maleA.push_back(X[i]);
 		}
 
-		/*double xDaszek=0;
+		double xDaszek=0;
 		for (size_t i = 0; i < ammount_of_samples/2; i++)
 		{
 			xDaszek = 0;
 			if (i == 0) {
 				xDaszekVector.push_back((right.at(i) + left.at(i)) * 0.5);
 			}
-			if (i <= r)
+			else if (i <= r)
 			{
-				xDaszekVector.push_back((right.at(i) + left.at(i)) * 0.5);
+				xDaszekVector.push_back((right.at(i - 1) + left.at(i - 1)) * 0.5);
 			}
 			else {
 				for (size_t j = 0; j < r; j++)
@@ -360,7 +359,7 @@ public:
 		for (int i = 0; i<ammount_of_samples / 2; i++)
 		{
 			eN.push_back((right.at(i)+left.at(i))/2 - xDaszekVector.at(i));
-		}*/
+		}
 
 		// usuwamy macierze z pamiêci
 		for (i = 0; i < n; i++) delete[] A[i];
@@ -385,48 +384,87 @@ public:
 		bool positive = true;
 		if (abs(*min) > *max) {
 			position = distance(begin(maleA), min);
-			*max = abs(*min); //tutaj mialem do maxa przypisywac dodatania wartosc czy ujemna? chyba dodatnai i nizej znak zapisac
-			positive = false; //cos bylo z zapisywaniem znaku maxa ale nie wiem po co xD
+			*max = abs(*min); 
+			positive = false;
 		}
 		else {
-			position = distance(begin(maleA), max); //po co mi ta pozycja max
+			position = distance(begin(maleA), max);
 		}
 
-		*max = float(*max); //o co chodzi z tym naglowkiem -->
-		vector<double>aDaszek; //HAHAH DASZEK TFU
+		*max = float(*max); 
 		vector<int>si;
-		for (int i = 0; i < maleA.size(); i++) {
-			aDaszek.push_back(floor(abs(maleA.at(i))/(*max) * (pow(2, b) - 1) + 1/2));
-			si.push_back(sign(maleA.at(i)));
-		}
-
+		vector<double>decod;
+		vector<double>aDaszek;
+		vector<double>xDaszekVector2;
+		vector<double>eN2;
+		
 		double Lsr;
 		double minLsr = 100;
 		int diagramBit = 0;
-		//lsr rosnie wraz z B, a na wykresie jest odwrotnie chyba to trzeba jakos powiazac z decodem
-		for (b = 8; b <= 24; b++) {
-			Lsr = ((entro(left) + entro(right)) / 2) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
+		for (int b = 8; b <= 24; b++) {
+
+			for (int i = 0; i < maleA.size(); i++) {
+				aDaszek.push_back(floor(abs(maleA.at(i)) / (*max) * (pow(2, b) - 1) + 1 / 2));//liczy dobrze
+				si.push_back(sign(maleA.at(i)));
+			}
+
+			for (int i = 0; i < maleA.size(); i++) {
+				decod.push_back((aDaszek.at(i) / (pow(2, b) - 1) * (*max)) * (si.at(i) * 2 - 1));//liczby dobrze
+			}
+
+			double xDaszek2 = 0;
+			for (size_t i = 0; i < ammount_of_samples / 2; i++)
+			{
+				xDaszek2 = 0;
+				if (i == 0) {
+					xDaszekVector2.push_back((right.at(i) + left.at(i)) * 0.5);
+				}
+				else if (i <= r)
+				{
+					xDaszekVector2.push_back((right.at(i - 1) + left.at(i - 1)) * 0.5);
+				}
+				else {
+					for (size_t j = 0; j < r; j++)
+					{
+						xDaszek2 += decod.at(j) * ((right.at(i - j) + left.at(i - j)) * 0.5);
+					}
+					if (xDaszek2 > pow(2, 15) - 1)
+					{
+						xDaszek2 = pow(2, 15) - 1;
+					}
+					else if (xDaszek2 < -pow(2, 15))
+					{
+						xDaszek2 = -pow(2, 15);
+					}
+					xDaszekVector2.push_back(floor(xDaszek2 + 0.5));
+				}
+			}
+
+			for (int i = 0; i<ammount_of_samples / 2; i++)
+			{
+				eN2.push_back((right.at(i) + left.at(i)) / 2 - xDaszekVector2.at(i));
+			}
+
+			Lsr = entro_minus(eN2) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);//czasami rosnie, czasami nie xD
 			if (minLsr > Lsr) {
 				minLsr = Lsr;
 				diagramBit = b;
 			}
-		}
 
-		//do czego mi ten decod i dlaczego to ma prawie identyczne wartosci jak nasz wspolczynnik maleA
-		vector<double>decod;
-		for (int i = 0; i < maleA.size(); i++) {
-			decod.push_back((aDaszek.at(i) / (pow(2, b) - 1) * (*max)) * (si.at(i) * 2 - 1));
-		}
-
-		//zapisuje do wykresu diagramBit oraz r, tylko co z decodem i diagramBit ³apie najni¿szy bit zamiast najwy¿szego jak na wykresie
-
+			si.clear();
+			eN2.clear();
+			decod.clear();
+			aDaszek.clear();
+			xDaszekVector2.clear();
+		}	
+		cout << "bit: " << diagramBit << endl;
 	}
 };
 
 void main()
 {
 	WaveReader wave1("ATrain.wav");
-	/*WaveReader wave2("BeautySlept.wav");
+	WaveReader wave2("BeautySlept.wav");
 	WaveReader wave3("death2.wav");
 	WaveReader wave4("experiencia.wav");
 	WaveReader wave5("chanchan.wav");
@@ -442,7 +480,7 @@ void main()
 	WaveReader wave15("TomsDiner.wav");
 	WaveReader wave16("velvet.wav");
 
-	double tab[16];
+	/*double tab[16];
 	double average = 0;
 	
 	tab[0] = wave1.getAverage();
