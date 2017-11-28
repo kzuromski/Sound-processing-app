@@ -2,10 +2,10 @@
 #include "WaveProcess.h"
 
 int r = 7;
-void start()
+double start()
 {
 	WaveProcess wave1("ATrain.wav");
-	/*WaveProcess wave2("BeautySlept.wav");
+	WaveProcess wave2("BeautySlept.wav");
 	WaveProcess wave3("death2.wav");
 	WaveProcess wave4("experiencia.wav");
 	WaveProcess wave5("chanchan.wav");
@@ -45,20 +45,18 @@ void start()
 		average += tab[i];
 	}
 	average /= 16;
-	cout << average << endl;
-	return average;*/
+	return average;
 }
 int main()
 {
-	start();
-	//cout << "r=" << r << endl << endl;
-	////for (r = 3; r < 10; r++)
-	////{
-	//	
 
-	//	ofstream averageFile("average_test.txt", ios::app);
-	//	averageFile << r << " " << start() << endl;
-	////}
+	for (r = 3; r < 10; r++)
+	{
+		
+		cout << "r=" << r << endl;
+		ofstream averageFile("average_test.txt", ios::app);
+		averageFile << r << " " << start() << endl;
+	}
 
 	system("pause");
 	return 0;

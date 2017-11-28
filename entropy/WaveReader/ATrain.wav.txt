@@ -1,2 +1,6 @@
 ATrain.wav
+Liczba próbek z obu kana³ów: 1688526.000000
 Przeciêtna energia sygna³u: 984597.915997
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 45940.023717
+Entropia: 11.882516
+Entropia z danych po skanowaniu ró¿nicowym: 9.422552

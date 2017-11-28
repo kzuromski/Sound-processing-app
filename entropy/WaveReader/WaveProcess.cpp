@@ -18,25 +18,18 @@ WaveProcess::WaveProcess(string name_of_wave)
 	ofstream new_file(name_of_wave + ".txt");
 	ammount_of_samples = ((size_of_file - 48) - 2) / 2; // liczba probek z obu kanalow
 	new_file << name_of_wave << endl;
-	cout << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
+	new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 	FillingUpChanels(); // wektory wypelniane danymi
 	double d = ((CalculateEnergy(left_chanel , ammount_of_samples / 2) + CalculateEnergy(right_chanel, ammount_of_samples / 2)) / 2);
 	new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
 	SamplesAfterScanning(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
 	d = ((CalculateEnergy(left_after_scan,ammount_of_samples / 2) + CalculateEnergy(right_after_scan,ammount_of_samples / 2)) / 2);
-	cout<< "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
-	cout << "Entropia: " << ((CalculateEntrophy(left_chanel) + CalculateEntrophy(right_chanel)) / 2) << endl; // entro dla normalnych
-	cout << "Entropia z danych po skanowaniu ró¿nicowym: " << ((CalculateEntrophy(left_after_scan) + CalculateEntrophy(right_after_scan)) / 2) << endl; // entro dla tych po skalowaniu
+	new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
+	new_file << "Entropia: " << ((CalculateEntrophy(left_chanel) + CalculateEntrophy(right_chanel)) / 2) << endl; // entro dla normalnych
+	new_file << "Entropia z danych po skanowaniu ró¿nicowym: " << ((CalculateEntrophy(left_after_scan) + CalculateEntrophy(right_after_scan)) / 2) << endl; // entro dla tych po skalowaniu
 	SystemOfEquations();
-	cout << eN.size() << endl;
-	double testowa = 0;
-	for (int i=0; i < eN.size(); i++)
-	{
-		testowa += eN[i];
-	}
-	cout << testowa << endl;
+	
 	average = CalculateEntrophy(eN);
-	cout << average << endl;
 	//new_file << "Entropia ze wspó³czynnikiem " << average << endl;
 	
 	//EntroBit();
@@ -236,78 +229,77 @@ bool WaveProcess::Lusolve(int n, double ** A, double * B, double * X)
 	return true;
 }
 
-void WaveProcess::SystemOfEquations() 
-{
-	double **X, *P, *A;
-	int n = r;
-	cout << fixed;
+void WaveProcess::SystemOfEquations() {
+	double **A, *B, *X;
+	int n, i, j;
+
+	n = r;
+
+	cout << setprecision(25) << fixed;
 
 	// tworzymy macierze A, B i X
-	X = new double *[n];
-	P = new double[n];
-	A = new double[n];
+	A = new double *[n];
+	B = new double[n];
+	X = new double[n];
+
+	for (i = 0; i < n; i++)
+		A[i] = new double[n];
 
 	int N = ammount_of_samples / 2; //dla jednego kanalu
 	double sum = 0; //zerowanie sumy
 	double sum2 = 0;
-	vector<double>matrix_x; //wektor dla macierzy X
-	vector<double>matrix_p; //wektor dla macierzy P
+	vector<double>a; //wektor dla macierzy X
+	vector<double>b; //wektor dla macierzy P
 
-	int licznik = 0;
-
-	for (int i = 0; i < n; i++)
+	for (i = 1; i <= r; i++)
 	{
-		X[i] = new double[n];
-	}
-
-	for (int i = 1; i <= r; i++)
-	{
-		for (int j = 1; j <= r; j++)
+		for (j = 1; j <= r; j++)
 		{
-			sum = 0;
-			sum2 = 0;
 			for (int z = r; z < N; z++)
 			{
 				sum += (right_chanel.at(z - i) * right_chanel.at(z - j) + left_chanel.at(z - i) * left_chanel.at(z - j)) * 0.5; //suma dla elementów macierzy X
 				sum2 += (right_chanel.at(z) * right_chanel.at(z - i) + left_chanel.at(z) * left_chanel.at(z - i)) * 0.5; //suma dla elementów macierzy P
 			}
-			matrix_x.push_back(sum);
+			a.push_back(sum);
 
 			if (j == 1)
 			{
-				matrix_p.push_back(sum2);
+				b.push_back(sum2);
 			}
-			
+			sum = 0;
+			sum2 = 0;
 		}
 	}
 
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			X[i][j] = matrix_x.at(licznik); // Macierz X (3x3)
+	int licznik = 0;
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < n; j++) {
+			A[i][j] = a.at(licznik); // Macierz X (3x3)
 			licznik++;
-			P[i] = matrix_p.at(i); // Macierz P (3x1)
+			B[i] = b.at(i); // Macierz P (3x1)
 		}
 	}
 
 	//Warunek czy macierz ma wyznanik niezerowy
-	if (!Ludist(n, X) && !Lusolve(n, X, P, A)) 
-	{
-		cout << "DZIELNIK ZERO" << endl;
+	if (Ludist(n, A) && Lusolve(n, A, B, X)) {}
+	else cout << "DZIELNIK ZERO\n";
+
+
+	for (int i = 0; i < r; i++) {
+		maleA.push_back(X[i]);
 	}
 
-	for (int i = 0; i < r; i++) 
-	{
-		maleA.push_back(A[i]);
-	}
-	xDaszekVector= NewXPushingAndCutting();
+	xDaszekVector = NewXPushingAndCutting();
+
 	for (int i = 0; i<ammount_of_samples / 2; i++)
 	{
 		eN.push_back((right_chanel.at(i) + left_chanel.at(i)) / 2 - xDaszekVector.at(i));
 	}
+
 	// usuwamy macierze z pamiêci
-	for (int i = 0; i < n; i++) delete[] X[i];
+	for (i = 0; i < n; i++) delete[] A[i];
 	delete[] A;
-	delete[] P;
+	delete[] B;
 	delete[] X;
 }
 
