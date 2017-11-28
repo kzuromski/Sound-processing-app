@@ -1,1 +1,6 @@
 BeautySlept.wav
+Liczba próbek z obu kana³ów: 1378518.000000
+Przeciêtna energia sygna³u: 2179311.772730
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 297318.832815
+Entropia: 11.889543
+Entropia z danych po skanowaniu ró¿nicowym: 10.719251

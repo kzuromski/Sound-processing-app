@@ -1,1 +1,6 @@
 LifeShatters.wav
+Liczba próbek z obu kana³ów: 1756156.000000
+Przeciêtna energia sygna³u: 51664030.320415
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 3390926.153129
+Entropia: 14.806514
+Entropia z danych po skanowaniu ró¿nicowym: 12.862774

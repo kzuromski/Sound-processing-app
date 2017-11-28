@@ -1,1 +1,2 @@
 Layla.wav
+Liczba próbek z obu kana³ów: 1749206.000000

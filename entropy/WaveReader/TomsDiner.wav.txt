@@ -1,1 +1,6 @@
 TomsDiner.wav
+Liczba próbek z obu kana³ów: 1751498.000000
+Przeciêtna energia sygna³u: 5268735.867492
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 299479.965361
+Entropia: 12.642949
+Entropia z danych po skanowaniu ró¿nicowym: 10.395452
