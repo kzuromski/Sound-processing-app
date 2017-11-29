@@ -1,0 +1,2 @@
+.\Waves\velvet.wav
+Liczba próbek z obu kana³ów: 1047684.000000

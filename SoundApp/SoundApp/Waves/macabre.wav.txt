@@ -1,0 +1,2 @@
+.\Waves\macabre.wav
+Liczba próbek z obu kana³ów: 1540674.000000

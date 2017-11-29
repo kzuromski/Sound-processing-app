@@ -1,0 +1,2 @@
+.\Waves\FloorEssence.wav
+Liczba próbek z obu kana³ów: 1764384.000000

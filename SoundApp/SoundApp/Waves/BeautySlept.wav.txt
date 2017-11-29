@@ -1,0 +1,2 @@
+.\Waves\BeautySlept.wav
+Liczba próbek z obu kana³ów: 1378518.000000

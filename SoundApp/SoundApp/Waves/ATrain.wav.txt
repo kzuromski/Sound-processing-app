@@ -1,0 +1,2 @@
+.\Waves\ATrain.wav
+Liczba próbek z obu kana³ów: 1688526.000000

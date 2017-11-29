@@ -1,0 +1,2 @@
+.\Waves\thear1.wav
+Liczba próbek z obu kana³ów: 1703930.000000

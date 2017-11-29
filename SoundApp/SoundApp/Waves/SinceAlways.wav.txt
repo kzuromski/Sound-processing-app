@@ -1,0 +1,2 @@
+.\Waves\SinceAlways.wav
+Liczba próbek z obu kana³ów: 1604472.000000

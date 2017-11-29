@@ -1,0 +1,2 @@
+.\Waves\LifeShatters.wav
+Liczba próbek z obu kana³ów: 1756156.000000

@@ -1,0 +1,2 @@
+.\Waves\TomsDiner.wav
+Liczba próbek z obu kana³ów: 1751498.000000
