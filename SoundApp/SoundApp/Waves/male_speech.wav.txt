@@ -1,0 +1,7 @@
+.\Waves\male_speech.wav
+Liczba próbek z obu kana³ów: 1583468.000000
+Przeciêtna energia sygna³u: 7765517.340254
+Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: 89120.425375
+Entropia: 12.372779
+Entropia z danych po skanowaniu ró¿nicowym: 9.361511
+Entropia ze wspó³czynnikiem 8.192839

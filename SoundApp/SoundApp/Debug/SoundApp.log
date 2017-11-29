@@ -1,0 +1,13 @@
+﻿  Main.cpp
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(50): error C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.15063.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(133): warning C4018: '<': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(144): warning C4018: '<': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(187): warning C4018: '<': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(206): warning C4018: '<': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(208): warning C4244: 'argument': conversion from 'double' to 'const unsigned int', possible loss of data
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(290): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(340): warning C4018: '<=': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(343): warning C4018: '<': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(421): warning C4018: '<=': signed/unsigned mismatch
+c:\users\koala\documents\visual studio 2017\projects\soundapp\soundapp\main.cpp(424): warning C4018: '<': signed/unsigned mismatch

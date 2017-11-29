@@ -1,3 +1,0 @@
-male_speech.wav
-Liczba próbek z obu kana³ów: 1583468.000000
-Entropia ze wspó³czynnikiem 8.788771
