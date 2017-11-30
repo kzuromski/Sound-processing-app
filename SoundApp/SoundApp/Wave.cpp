@@ -36,6 +36,7 @@ Wave::Wave(string name_of_wave, int r)
 	int rightBit = EntroBit(right);
 	int leftBit = EntroBit(left);
 	averageBit = ceil((rightBit + leftBit) / 2);
+	cout << averageBit << endl;
 }
 
 Wave::~Wave() {
@@ -358,27 +359,26 @@ int Wave::EntroBit(vector<INT16>canal) {
 	double entropia = 0;
 	double minLsr = 100;
 	int diagramBit = 0;
-	for (int b = 8; b <= 24; b++) {
+	//kropki
+	for (int b = 5; b <= 16; b++) {
 
 		for (int i = 0; i < r; i++) {
 			coder.push_back(floor(abs(vectorEPS.at(i)) / (*max) * (pow(2, b) - 1) + 0.5));
 			si.push_back(sign(vectorEPS.at(i)));
 		}
 
-		vector<double> coderEntropia;
-		coderEntropia = sendEntropia(canal, coder);
-		Lsr = entro_minus(coderEntropia) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
+		for (int i = 0; i < r; i++)
+			decoder.push_back(((coder.at(i) / (pow(2, b) - 1)) * (*max)) * (si.at(i) * 2 - 1));
+
+		vector<double> decoderEntropia;
+		decoderEntropia = sendEntropia(canal, decoder);
+
+		Lsr = entro_minus(decoderEntropia) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 		
 		if (minLsr > Lsr) {
 			minLsr = Lsr;
 			diagramBit = b;
-		}
-
-		//for (int i = 0; i < r; i++)
-			//decoder.push_back(((coder.at(i) / (pow(2, b) - 1)) * (*max)) * (si.at(i) * 2 - 1));
-
-		//vector<double> decoderEntropia;
-		//decoderEntropia = sendEntropia(canal, decoder);
+		}	
 
 		si.clear();
 		decoder.clear();
@@ -387,3 +387,12 @@ int Wave::EntroBit(vector<INT16>canal) {
 	
 	return diagramBit;
 }
+
+void divideEPS () {
+	/*
+	1. liczymy Lsr dla b=12, r=120 wraz z a_i podzielone na 2 wszystko ceil((N/4)) moze zamiast ceil(N/k) <=> N - (k-1) * ceil(N/k)
+	(r, k) <=> (120,1), (60,2), (40,3), (30,4), (24,5), (20,6), (15,8), (12,10), (10,12), (8,15), (6,20), (5,24), (4,30), (3,40)
+	Lsr dla 14 przypadkow i szukamy min
+	*/
+}
+

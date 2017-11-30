@@ -1,12 +1,11 @@
-﻿  Main.cpp
-  Wave.cpp
-Wave.cpp(163): warning C4244: 'argument': conversion from 'double' to 'const unsigned __int64', possible loss of data
-Wave.cpp(268): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-Wave.cpp(344): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-Wave.cpp(349): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+﻿  Wave.cpp
+Wave.cpp(164): warning C4244: 'argument': conversion from 'double' to 'const unsigned __int64', possible loss of data
+Wave.cpp(269): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Wave.cpp(345): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+Wave.cpp(350): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
   Generating code
-  9 of 488 functions ( 1.8%) were compiled, the rest were copied from previous compilation.
+  8 of 490 functions ( 1.6%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SoundApp.vcxproj -> C:\Users\koala\Documents\GitHub\Sound-processing-app\SoundApp\x64\Release\SoundApp.exe

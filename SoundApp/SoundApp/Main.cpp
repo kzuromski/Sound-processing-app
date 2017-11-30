@@ -48,9 +48,9 @@ void start(int r) {
 
 void main() {
 
-	for (int r = 40; r >= 3; r --) {
+	for (int r = 10; r <= 600; r += 10) {
 		cout << "r = " << r << endl;
-		start(2);
+		start(r);
 	}
 
 	system("pause");
