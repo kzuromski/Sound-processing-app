@@ -39,6 +39,7 @@ private:
 	double ammount_of_samples;
 	double averageEPS;
 	double averageBit;
+	double averageLsr;
 	int r;
 
 public:
@@ -46,6 +47,7 @@ public:
 	~Wave();
 	double getAverage();
 	double getAverageBit();
+	double getAverageLsr();
 	void ReadData(); //czytanie danych
 	void normal_vectors(); // wypelnie wektorow danymi, parzyste do lewego, nieparzyste do prawego
 	void minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
@@ -59,4 +61,6 @@ public:
 	vector<double> SystemOfEquations(vector<INT16>canal);
 	bool sign(double a);
 	int EntroBit(vector<INT16>canal);
+	vector<double> calculateEPS(vector<INT16>canal, int k);
+	double divideEPS(vector<INT16>canal);
 };
