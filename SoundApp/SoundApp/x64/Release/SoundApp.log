@@ -1,14 +1,16 @@
-﻿  Wave.cpp
-Wave.cpp(171): warning C4244: 'argument': conversion from 'double' to 'const unsigned __int64', possible loss of data
-Wave.cpp(276): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-Wave.cpp(352): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-Wave.cpp(357): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-Wave.cpp(403): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-Wave.cpp(472): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-Wave.cpp(477): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+﻿  Main.cpp
+  Wave.cpp
+Wave.cpp(168): warning C4244: 'argument': conversion from 'double' to 'const unsigned __int64', possible loss of data
+Wave.cpp(273): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Wave.cpp(335): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Wave.cpp(393): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+Wave.cpp(398): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+Wave.cpp(449): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Wave.cpp(511): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+Wave.cpp(516): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
   Generating code
-  9 of 491 functions ( 1.8%) were compiled, the rest were copied from previous compilation.
+  8 of 474 functions ( 1.7%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SoundApp.vcxproj -> C:\Users\koala\Documents\GitHub\Sound-processing-app\SoundApp\x64\Release\SoundApp.exe

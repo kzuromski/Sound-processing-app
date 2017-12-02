@@ -33,7 +33,6 @@ private:
 	vector<double> right_minus;
 	vector<double>rightEPS;
 	vector<double>leftEPS;
-	bool whichCanalEPS = true;
 	ofstream new_file;
 	FILE *wf;
 	double ammount_of_samples;
@@ -45,7 +44,7 @@ private:
 public:
 	Wave(string name_of_wave, int r);
 	~Wave();
-	double getAverage();
+	double getAverageEPS();
 	double getAverageBit();
 	double getAverageLsr();
 	void ReadData(); //czytanie danych
@@ -58,7 +57,7 @@ public:
 	bool ludist(int n, double ** A); // Funkcja wyznacza wektor X na podstawie A i B
 	bool lusolve(int n, double ** A, double * B, double * X);
 	vector<double> sendEntropia(vector<INT16>canal, vector<double>vectorEPS);
-	vector<double> SystemOfEquations(vector<INT16>canal);
+	double SystemOfEquations(vector<INT16>canal);
 	bool sign(double a);
 	int EntroBit(vector<INT16>canal);
 	double divideEPS(vector<INT16>canal);
