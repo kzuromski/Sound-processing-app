@@ -61,6 +61,5 @@ public:
 	vector<double> SystemOfEquations(vector<INT16>canal);
 	bool sign(double a);
 	int EntroBit(vector<INT16>canal);
-	vector<double> calculateEPS(vector<INT16>canal, int k);
 	double divideEPS(vector<INT16>canal);
 };
