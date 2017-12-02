@@ -33,10 +33,14 @@ Wave::Wave(string name_of_wave, int r)
 	//new_file << "Entropia ze wspó³czynnikiem " << averageEPS << endl;
 
 	//r<10;600>
-	//averageBit = ceil((EntroBit(right) + EntroBit(left)) / 2);
+	averageBit = ceil((EntroBit(right) + EntroBit(left)) / 2);
+	
+	for (int i = 0; i < 2; i++)
+		averageLsr += minLsrVector.at(i);
+	averageLsr /= 2;
 
 	//r<120;4>
-	averageLsr = (divideEPS(right) + divideEPS(left)) / 2;
+	//averageLsr = (divideEPS(right) + divideEPS(left)) / 2;
 }
 
 Wave::~Wave() {
@@ -239,15 +243,15 @@ vector<double> Wave::sendEntropia(vector<INT16>canal, vector<double>vectorEPS) {
 		sumError = 0;
 		if (i == 0)
 			absoluteError.push_back(canal.at(i));
-		if (i <= r)
-			absoluteError.push_back(canal.at(i));
+		else if (i <= r)
+			absoluteError.push_back(canal.at(i - 1));
 		else {
-			for (size_t j = 0; j < r; j++)
-				sumError += vectorEPS.at(j) * canal.at(i - j);
-			if (sumError > pow(2, 15) - 1)
-				sumError = pow(2, 15) - 1;
-			else if (sumError < -pow(2, 15))
-				sumError = -pow(2, 15);
+			for (size_t j = 1; j <= r; j++)
+				sumError += vectorEPS.at(j - 1) * canal.at(i - j);
+			if (sumError > 32768 - 1)
+				sumError = 32768 - 1;
+			else if (sumError < -32768)
+				sumError = -32768;
 			absoluteError.push_back(floor(sumError + 0.5));
 		}
 	}
@@ -407,7 +411,7 @@ int Wave::EntroBit(vector<INT16>canal) {
 	double entropia = 0;
 	double minLsr = 100;
 	int diagramBit = 0;
-	for (int b = 8; b <= 24; b++) {
+	for (int b = 5; b <= 21; b++) {
 
 		for (int i = 0; i < r; i++) {
 			coder.push_back(floor(abs(vectorEPS.at(i)) / (*max) * (pow(2, b) - 1) + 0.5));
@@ -423,6 +427,7 @@ int Wave::EntroBit(vector<INT16>canal) {
 		Lsr = entro_minus(decoderEntropia) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 		if (minLsr > Lsr) {
 			minLsr = Lsr;
+			minLsrVector.push_back(minLsr);
 			diagramBit = b;
 		}	
 

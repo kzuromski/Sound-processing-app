@@ -31,8 +31,7 @@ private:
 	vector<double> left_minus;
 	vector<INT16> right;
 	vector<double> right_minus;
-	vector<double>rightEPS;
-	vector<double>leftEPS;
+	vector<double>minLsrVector;
 	ofstream new_file;
 	FILE *wf;
 	double ammount_of_samples;
