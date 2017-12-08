@@ -58,22 +58,23 @@ void start(int r) {
 	for (int i = 0; i < 16; i++)
 		average += tab[i];
 
-	double averageXD = 0;
+	double average2 = 0;
 	for (int i = 16; i < 32; i++)
-		averageXD += tab[i];
+		average2 += tab[i];
 
 	average /= 16;
-	averageXD /= 16;
+	average2 /= 16;
 	ofstream averageFile("average.txt", ios::app);
-	averageFile << r << " " << average << " " << averageXD << endl;
+	averageFile << r << " " << average << " " << average2 << endl;
 }
 
 void main() {
-	//nazwy zmiennych do zmiany
-	for (int r = 10; r <= 600; r += 10) {
+
+	for (int r = 10; r <= 200; r += 10) {
 		cout << "r = " << r << endl;
 		start(r);
 	}
+
 	/*start(3);
 	start(4);
 	start(5);

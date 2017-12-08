@@ -33,7 +33,8 @@ Wave::Wave(string name_of_wave, int r)
 	//new_file << "Entropia ze wspó³czynnikiem " << averageEPS << endl;
 
 	//r<10;600>
-	averageBit = ceil((EntroBit(right) + EntroBit(left)) / 2);
+	averageBit = (EntroBit(right) + EntroBit(left)) / 2;
+	cout << EntroBit(right) << endl;
 	
 	for (int i = 0; i < 2; i++)
 		averageLsr += minLsrVector.at(i);
@@ -235,43 +236,42 @@ bool Wave::lusolve(int n, double ** A, double * B, double * X)
 	return true;
 }
 
-vector<double> Wave::sendEntropia(vector<INT16>canal, vector<double>vectorEPS) {
-	double sumError = 0;
-	vector <double> entropiaEPS;
-	vector <double> absoluteError;
+vector<double> Wave::counterRepeat(vector<INT16>canal, vector<double>vectorEPS) {
+	double sumPredict = 0;
+	vector <double> counters;
+	vector <double> predictValue;
 	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
-		sumError = 0;
+		sumPredict = 0;
 		if (i == 0)
-			absoluteError.push_back(canal.at(i));
+			predictValue.push_back(canal.at(i));
 		else if (i <= r)
-			absoluteError.push_back(canal.at(i - 1));
+			predictValue.push_back(canal.at(i - 1));
 		else {
 			for (size_t j = 1; j <= r; j++)
-				sumError += vectorEPS.at(j - 1) * canal.at(i - j);
-			if (sumError > 32768 - 1)
-				sumError = 32768 - 1;
-			else if (sumError < -32768)
-				sumError = -32768;
-			absoluteError.push_back(floor(sumError + 0.5));
+				sumPredict += vectorEPS.at(j - 1) * canal.at(i - j);
+			if (sumPredict > 32768 - 1)
+				sumPredict = 32768 - 1;
+			else if (sumPredict < -32768)
+				sumPredict = -32768;
+			predictValue.push_back(floor(sumPredict + 0.5));
 		}
 	}
 	for (int i = 0; i < ammount_of_samples / 2; i++)
-		entropiaEPS.push_back(canal.at(i) - absoluteError.at(i));
+		counters.push_back(canal.at(i) - predictValue.at(i));
 	
-	return entropiaEPS;
+	return counters;
 }
 
 double Wave::SystemOfEquations(vector<INT16>canal) {
 	double **A, *B, *X;
-	int n, i, j;
-	n = r;
+	int n = r;
 
 	cout << setprecision(10) << fixed;
 	A = new double *[n];
 	B = new double[n];
 	X = new double[n];
 
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 		A[i] = new double[n];
 
 	int N = ammount_of_samples / 2;
@@ -281,8 +281,8 @@ double Wave::SystemOfEquations(vector<INT16>canal) {
 	vector<double>matrixP;
 	vector<double> vectorEPS;
 
-	for (i = 1; i <= r; i++) {
-		for (j = 1; j <= r; j++) {
+	for (int i = 1; i <= r; i++) {
+		for (int j = 1; j <= r; j++) {
 			for (int z = r; z < N; z++) {
 				sumX += canal.at(z - i) * canal.at(z - j);
 				sumP += canal.at(z) * canal.at(z - i);
@@ -296,11 +296,11 @@ double Wave::SystemOfEquations(vector<INT16>canal) {
 		}
 	}
 
-	int licznik = 0;
-	for (i = 0; i < n; i++) {
-		for (j = 0; j < n; j++) {
-			A[i][j] = matrixX.at(licznik);
-			licznik++;
+	int counterVector = 0;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			A[i][j] = matrixX.at(counterVector);
+			counterVector++;
 			B[i] = matrixP.at(i);
 		}
 	}
@@ -308,14 +308,16 @@ double Wave::SystemOfEquations(vector<INT16>canal) {
 	if (ludist(n, A) && lusolve(n, A, B, X)) {}
 	else cout << "DZIELNIK ZERO\n";
 
-	for (int i = 0; i < r; i++) 
+	for (int i = 0; i < r; i++) {
 		vectorEPS.push_back(X[i]);
+		cout << "normal: " << vectorEPS.at(i) << endl;
+	}
 
-	vector<double> Entropia;
-	Entropia = sendEntropia(canal, vectorEPS);
-	double returnEntropia = entro_minus(Entropia);
+	vector<double> counters;
+	counters = counterRepeat(canal, vectorEPS);
+	double returnEntropia = entro_minus(counters);
 
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 		delete[] A[i];
 	delete[] A;
 	delete[] B;
@@ -331,11 +333,10 @@ bool Wave::sign(double a) {
 		return 0;
 }
 
-int Wave::EntroBit(vector<INT16>canal) {
+double Wave::EntroBit(vector<INT16>canal) {
 
 	double **A, *B, *X;
-	int n, i, j;
-	n = r;
+	int n = r;
 	int N = ammount_of_samples / 2;
 
 	cout << setprecision(10) << fixed;
@@ -343,7 +344,7 @@ int Wave::EntroBit(vector<INT16>canal) {
 	B = new double[n];
 	X = new double[n];
 
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 		A[i] = new double[n];
 
 	double sumX = 0;
@@ -352,8 +353,8 @@ int Wave::EntroBit(vector<INT16>canal) {
 	vector<double>matrixP;
 	vector<double>vectorEPS;
 
-	for (i = 1; i <= r; i++) {
-		for (j = 1; j <= r; j++) {
+	for (int i = 1; i <= r; i++) {
+		for (int j = 1; j <= r; j++) {
 			for (int z = r ; z < N ; z++) {
 				sumX += canal.at(z - i) * canal.at(z - j);
 				sumP += canal.at(z) * canal.at(z - i);
@@ -367,11 +368,11 @@ int Wave::EntroBit(vector<INT16>canal) {
 		}
 	}
 
-	int licznik = 0;
-	for (i = 0; i < n; i++) {
-		for (j = 0; j < n; j++) {
-			A[i][j] = matrixX.at(licznik);
-			licznik++;
+	int counterVector = 0;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			A[i][j] = matrixX.at(counterVector);
+			counterVector++;
 			B[i] = matrixP.at(i);
 		}
 	}
@@ -382,59 +383,52 @@ int Wave::EntroBit(vector<INT16>canal) {
 	for (int i = 0; i < r; i++) 
 		vectorEPS.push_back(X[i]);
 
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 		delete[] A[i];
 	delete[] A;
 	delete[] B;
 	delete[] X;
 
-	auto max = max_element(begin(vectorEPS), end(vectorEPS));
-	auto min = min_element(begin(vectorEPS), end(vectorEPS));
-	auto position = 0;
+	double max = *max_element(begin(vectorEPS), end(vectorEPS));
+	double min = *min_element(begin(vectorEPS), end(vectorEPS));
 
-	bool positive = true;
-	if (abs(*min) > *max) {
-		position = distance(begin(vectorEPS), min);
-		*max = abs(*min);
-		positive = false;
-	}
-	else {
-		position = distance(begin(vectorEPS), max);
-	}
+	if (abs(min) > max) 
+		max = abs(min);
+	max = float(max);
 
-	*max = float(*max);
 	vector<int>si;
-	vector<double>coder;
-	vector<double>decoder;
+	vector<double>scale;
+	vector<double>descale;
+	vector<double> counters;
 
 	double Lsr;
 	double entropia = 0;
 	double minLsr = 100;
 	int diagramBit = 0;
-	for (int b = 5; b <= 21; b++) {
+	for (int b = 5; b <= 16; b++) {
 
 		for (int i = 0; i < r; i++) {
-			coder.push_back(floor(abs(vectorEPS.at(i)) / (*max) * (pow(2, b) - 1) + 0.5));
+			scale.push_back(floor(abs(vectorEPS.at(i)) / (max) * (pow(2, b) - 1) + 0.5));
 			si.push_back(sign(vectorEPS.at(i)));
 		}
 
 		for (int i = 0; i < r; i++)
-			decoder.push_back(((coder.at(i) / (pow(2, b) - 1)) * (*max)) * (si.at(i) * 2 - 1));
+			descale.push_back(((scale.at(i) / (pow(2, b) - 1)) * (max)) * (si.at(i) * 2 - 1));
 
-		vector<double> decoderEntropia;
-		decoderEntropia = sendEntropia(canal, decoder);
+		counters = counterRepeat(canal, descale);
+		Lsr = entro_minus(counters) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 
-		Lsr = entro_minus(decoderEntropia) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 		if (minLsr > Lsr) {
 			minLsr = Lsr;
-			minLsrVector.push_back(minLsr);
 			diagramBit = b;
 		}	
 
 		si.clear();
-		decoder.clear();
-		coder.clear();
+		scale.clear();
+		descale.clear();
+		counters.clear();
 	}
+	minLsrVector.push_back(minLsr);
 	
 	return diagramBit;
 }
@@ -442,37 +436,36 @@ int Wave::EntroBit(vector<INT16>canal) {
 double Wave::divideEPS (vector<INT16>canal) {
 
 	vector<int>si;
-	vector<double>coder;
-	vector<double>decoder;
+	vector<double>scale;
+	vector<double>descale;
 	vector<double>matrixX;
 	vector<double>matrixP;
 	vector<double>vectorEPS;
-	vector<double>decoderEntropia;
+	vector<double>counters;
 
 	int b = 12;
 	int k = 120 / r;
-	int N = (ammount_of_samples / 2) -(k - 1) * ceil((ammount_of_samples / 2) / k);	//ceil(ammount_of_samples / 2)/k;
+	int N = (ammount_of_samples / 2) - (k - 1) * ceil((ammount_of_samples / 2) / k);	//ceil(ammount_of_samples / 2)/k;
 	double minLsr = 100;
 	double Lsr;
 	
 	for (int p = 1; p <= k; p++) {
 		double **A, *B, *X;
-		int n, i, j;
-		n = r;
+		int n = r;
 
 		cout << setprecision(10) << fixed;
 		A = new double *[n];
 		B = new double[n];
 		X = new double[n];
 
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			A[i] = new double[n];
 
 		double sumX = 0;
 		double sumP = 0;
 
-		for (i = 1; i <= r; i++) {
-			for (j = 1; j <= r; j++) {
+		for (int i = 1; i <= r; i++) {
+			for (int j = 1; j <= r; j++) {
 				for (int z = r + (N * p - N); z < N * p; z++) {
 					sumX += canal.at(z - i) * canal.at(z - j);
 					sumP += canal.at(z) * canal.at(z - i);
@@ -486,11 +479,11 @@ double Wave::divideEPS (vector<INT16>canal) {
 			}
 		}
 
-		int licznik = 0;
-		for (i = 0; i < n; i++) {
-			for (j = 0; j < n; j++) {
-				A[i][j] = matrixX.at(licznik);
-				licznik++;
+		int counterVector = 0;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				A[i][j] = matrixX.at(counterVector);
+				counterVector++;
 				B[i] = matrixP.at(i);
 			}
 		}
@@ -498,51 +491,41 @@ double Wave::divideEPS (vector<INT16>canal) {
 		if (ludist(n, A) && lusolve(n, A, B, X)) {}
 		else cout << "DZIELNIK ZERO\n";
 
-		for (int i = 0; i < r; i++) 
+		for (int i = 0; i < r; i++)
 			vectorEPS.push_back(X[i]);
 
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			delete[] A[i];
 		delete[] A;
 		delete[] B;
 		delete[] X;
 
-		auto max = max_element(begin(vectorEPS), end(vectorEPS));
-		auto min = min_element(begin(vectorEPS), end(vectorEPS));
-		auto position = 0;
+		double max = *max_element(begin(vectorEPS), end(vectorEPS));
+		double min = *min_element(begin(vectorEPS), end(vectorEPS));
 
-		bool positive = true;
-		if (abs(*min) > *max) {
-			position = distance(begin(vectorEPS), min);
-			*max = abs(*min);
-			positive = false;
-		}
-		else {
-			position = distance(begin(vectorEPS), max);
-		}
+		if (abs(min) > max) 
+			max = abs(min);
+		max = float(max);
 
-		*max = float(*max);
 		for (int i = 0; i < r; i++) {
-			coder.push_back(floor(abs(vectorEPS.at(i)) / (*max) * (pow(2, b) - 1) + 0.5));
+			scale.push_back(floor(abs(vectorEPS.at(i)) / (max) * (pow(2, b) - 1) + 0.5));
 			si.push_back(sign(vectorEPS.at(i)));
 		}
 
 		for (int i = 0; i < r; i++) 
-			decoder.push_back(((coder.at(i) / (pow(2, b) - 1)) * (*max)) * (si.at(i) * 2 - 1));
-		
-		decoderEntropia = sendEntropia(canal, decoder);
-		Lsr = entro_minus(decoderEntropia) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
+			descale.push_back(((scale.at(i) / (pow(2, b) - 1)) * (max)) * (si.at(i) * 2 - 1));
+
+		counters = counterRepeat(canal, descale);
+		Lsr = entro_minus(counters) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 
 		if (minLsr > Lsr)
 			minLsr = Lsr;
 
 		si.clear();
-		coder.clear();
-		decoder.clear();
-		matrixX.clear();
-		matrixP.clear();
+		scale.clear();
+		descale.clear();
 		vectorEPS.clear();
-		decoderEntropia.clear();
+		counters.clear();
 	}
 
 	return minLsr;

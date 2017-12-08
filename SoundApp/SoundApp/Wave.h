@@ -55,9 +55,9 @@ public:
 	double entro_minus(vector<double> a); // Funkcja dokonuje rozk³adu LU macierzy A
 	bool ludist(int n, double ** A); // Funkcja wyznacza wektor X na podstawie A i B
 	bool lusolve(int n, double ** A, double * B, double * X);
-	vector<double> sendEntropia(vector<INT16>canal, vector<double>vectorEPS);
+	vector<double> counterRepeat(vector<INT16>canal, vector<double>vectorEPS);
 	double SystemOfEquations(vector<INT16>canal);
 	bool sign(double a);
-	int EntroBit(vector<INT16>canal);
+	double EntroBit(vector<INT16>canal);
 	double divideEPS(vector<INT16>canal);
 };
