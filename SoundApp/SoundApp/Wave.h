@@ -17,7 +17,7 @@ private:
 	FOURCC wave; // "WAVE" file descripton header
 	FOURCC fmt; // "fmt" description header
 	DWORD chunk; // size of WAVE section chunck
-	WORD pcm; // WAVE type format
+	DWORD pcm; // WAVE type format
 	WORD chanel; // mono/stereo
 	DWORD sample_rate; // sample rate
 	DWORD bytes_per_sec; // bytes/sec
@@ -60,4 +60,6 @@ public:
 	bool sign(double a);
 	double EntroBit(vector<INT16>canal);
 	double divideEPS(vector<INT16>canal);
+	void DecoderDifferential(vector<double>canal);
+	void DecoderPredictive(vector<INT16>canal);
 };

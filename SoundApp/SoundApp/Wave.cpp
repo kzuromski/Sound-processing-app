@@ -15,14 +15,14 @@ Wave::Wave(string name_of_wave, int r)
 	ReadData();
 
 	ofstream new_file(name_of_wave + ".txt");
-	ammount_of_samples = ((size_of_file - 48) - 2) / 2; // liczba probek z obu kanalow
+	ammount_of_samples = ((size_of_file - 36) - 2) / 2; // liczba probek z obu kanalow
 	new_file << name_of_wave << endl;
 	new_file << "Liczba próbek z obu kana³ów: " << fixed << ammount_of_samples << endl;
 	normal_vectors(); // wektory wypelniane danymi
 
-	//double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
-	//new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
-	//minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
+	double d = ((first_calculation(ammount_of_samples / 2, left) + first_calculation(ammount_of_samples / 2, right)) / 2);
+	new_file << "Przeciêtna energia sygna³u: " << fixed << d << endl; // pierwsze obliczenia
+	minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniej probki od obecnej
 	//d = ((first_calculation_minus(ammount_of_samples / 2, left_minus) + first_calculation_minus(ammount_of_samples / 2, right_minus)) / 2);
 	//new_file << "Przeciêtna energia sygna³u po skanowaniu ró¿nicowym: " << fixed << d << endl;  // drugie obliczenia
 	//new_file << "Entropia: " << ((entro(left) + entro(right)) / 2) << endl; // entro dla normalnych
@@ -33,15 +33,19 @@ Wave::Wave(string name_of_wave, int r)
 	//new_file << "Entropia ze wspó³czynnikiem " << averageEPS << endl;
 
 	//r<10;600>
-	averageBit = (EntroBit(right) + EntroBit(left)) / 2;
-	cout << EntroBit(right) << endl;
+	/*averageBit = (EntroBit(right) + EntroBit(left)) / 2;
+	cout << EntroBit(right) << endl;*/
 	
-	for (int i = 0; i < 2; i++)
+	/*for (int i = 0; i < 2; i++)
 		averageLsr += minLsrVector.at(i);
-	averageLsr /= 2;
+	averageLsr /= 2;*/
 
 	//r<120;4>
 	//averageLsr = (divideEPS(right) + divideEPS(left)) / 2;
+
+	//DecoderDifferential(left_minus);
+	DecoderPredictive(left);
+
 }
 
 Wave::~Wave() {
@@ -67,7 +71,7 @@ void Wave::ReadData()
 	fread(&wave, sizeof(FOURCC), 1, wf);
 	fread(&fmt, sizeof(FOURCC), 1, wf);
 	fread(&chunk, sizeof(FOURCC), 1, wf);
-	fread(&pcm, sizeof(WORD), 1, wf);
+	fread(&pcm, sizeof(DWORD), 1, wf);
 	fread(&chanel, sizeof(WORD), 1, wf);
 	fread(&sample_rate, sizeof(DWORD), 1, wf);
 	fread(&bytes_per_sec, sizeof(DWORD), 1, wf);
@@ -82,7 +86,7 @@ void Wave::normal_vectors()
 	for (int i = 0; i < ammount_of_samples; i++)
 	{
 		fread(&data_of_file, sizeof(INT16), 1, wf);
-		if (i % 2 == 0)
+		if (i % 2 != 0)
 		{
 			left.push_back(data_of_file);
 		}
@@ -242,7 +246,7 @@ vector<double> Wave::counterRepeat(vector<INT16>canal, vector<double>vectorEPS) 
 	vector <double> predictValue;
 	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
 		sumPredict = 0;
-		if (i == 0)
+		if (i == 0) 
 			predictValue.push_back(canal.at(i));
 		else if (i <= r)
 			predictValue.push_back(canal.at(i - 1));
@@ -256,8 +260,13 @@ vector<double> Wave::counterRepeat(vector<INT16>canal, vector<double>vectorEPS) 
 			predictValue.push_back(floor(sumPredict + 0.5));
 		}
 	}
-	for (int i = 0; i < ammount_of_samples / 2; i++)
-		counters.push_back(canal.at(i) - predictValue.at(i));
+
+	for (int i = 0; i < ammount_of_samples / 2; i++) {
+		if(i == 0)
+			counters.push_back(canal.at(i));
+		else
+			counters.push_back(canal.at(i) - predictValue.at(i));
+	}
 	
 	return counters;
 }
@@ -308,10 +317,8 @@ double Wave::SystemOfEquations(vector<INT16>canal) {
 	if (ludist(n, A) && lusolve(n, A, B, X)) {}
 	else cout << "DZIELNIK ZERO\n";
 
-	for (int i = 0; i < r; i++) {
+	for (int i = 0; i < r; i++) 
 		vectorEPS.push_back(X[i]);
-		cout << "normal: " << vectorEPS.at(i) << endl;
-	}
 
 	vector<double> counters;
 	counters = counterRepeat(canal, vectorEPS);
@@ -445,7 +452,7 @@ double Wave::divideEPS (vector<INT16>canal) {
 
 	int b = 12;
 	int k = 120 / r;
-	int N = (ammount_of_samples / 2) - (k - 1) * ceil((ammount_of_samples / 2) / k);	//ceil(ammount_of_samples / 2)/k;
+	int N = (ammount_of_samples / 2) - (k - 1) * ceil((ammount_of_samples / 2) / k);
 	double minLsr = 100;
 	double Lsr;
 	
@@ -531,3 +538,106 @@ double Wave::divideEPS (vector<INT16>canal) {
 	return minLsr;
 }
 
+void Wave::DecoderDifferential(vector<double>canal) {
+
+	vector <double> decoderCanal;
+	for (int i = 0; i < canal.size(); i++){
+		if (i == 0)
+			decoderCanal.push_back(canal.at(i));
+		else
+			decoderCanal.push_back(canal.at(i) + decoderCanal.at(i - 1));
+	}
+
+	for (int i = 0; i < 5; i++)
+		cout << decoderCanal.at(i) << endl;
+}
+
+void Wave::DecoderPredictive(vector<INT16>canal) {
+
+	double **A, *B, *X;
+	int n = r;
+
+	cout << setprecision(10) << fixed;
+	A = new double *[n];
+	B = new double[n];
+	X = new double[n];
+
+	for (int i = 0; i < n; i++)
+		A[i] = new double[n];
+
+	int N = ammount_of_samples / 2;
+	double sumX = 0;
+	double sumP = 0;
+	vector<double>matrixX;
+	vector<double>matrixP;
+	vector<double> vectorEPS;
+
+	for (int i = 1; i <= r; i++) {
+		for (int j = 1; j <= r; j++) {
+			for (int z = r; z < N; z++) {
+				sumX += canal.at(z - i) * canal.at(z - j);
+				sumP += canal.at(z) * canal.at(z - i);
+			}
+
+			if (j == 1)
+				matrixP.push_back(sumP);
+			matrixX.push_back(sumX);
+			sumX = 0;
+			sumP = 0;
+		}
+	}
+
+	int counterVector = 0;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			A[i][j] = matrixX.at(counterVector);
+			counterVector++;
+			B[i] = matrixP.at(i);
+		}
+	}
+
+	if (ludist(n, A) && lusolve(n, A, B, X)) {}
+	else cout << "DZIELNIK ZERO\n";
+
+	for (int i = 0; i < r; i++)
+		vectorEPS.push_back(X[i]);
+
+	for (int i = 0; i < n; i++)
+		delete[] A[i];
+	delete[] A;
+	delete[] B;
+	delete[] X;
+
+	vector <double> coderCanal = counterRepeat(canal, vectorEPS);
+	vector <double> decoderCanal;
+	double sumPredict = 0;
+	vector <double> predictValue;
+
+	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
+		sumPredict = 0;
+		if (i == 0)
+			predictValue.push_back(canal.at(i));
+		else if (i <= r)
+			predictValue.push_back(canal.at(i - 1));
+		else {
+			for (size_t j = 1; j <= r; j++)
+				sumPredict += vectorEPS.at(j - 1) * canal.at(i - j);
+			if (sumPredict > 32768 - 1)
+				sumPredict = 32768 - 1;
+			else if (sumPredict < -32768)
+				sumPredict = -32768;
+			predictValue.push_back(floor(sumPredict + 0.5));
+		}
+	}
+
+	for (int i = 0; i < ammount_of_samples / 2; i++) {
+		if(i == 0)
+			decoderCanal.push_back(coderCanal.at(i));
+		else
+			decoderCanal.push_back(coderCanal.at(i) + predictValue.at(i));
+	}
+
+	for (int i = 0; i < 5; i++) 
+		cout << decoderCanal.at(i) << endl;
+
+}

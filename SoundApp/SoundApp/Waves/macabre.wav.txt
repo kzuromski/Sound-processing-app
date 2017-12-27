@@ -1,2 +1,3 @@
 .\Waves\macabre.wav
-Liczba próbek z obu kana³ów: 1540674.000000
+Liczba próbek z obu kana³ów: 1540680.000000
+Entropia ze wspó³czynnikiem 10.468522
