@@ -45,6 +45,7 @@ Wave::Wave(string name_of_wave, int r)
 
 	//DecoderDifferential(left_minus);
 	DecoderPredictive(left);
+	//Probability(left);
 
 }
 
@@ -240,15 +241,17 @@ bool Wave::lusolve(int n, double ** A, double * B, double * X)
 	return true;
 }
 
-vector<double> Wave::counterRepeat(vector<INT16>canal, vector<double>vectorEPS) {
+vector<double> Wave::predictCoder(vector<INT16>canal, vector<double>vectorEPS) {
 	double sumPredict = 0;
 	vector <double> counters;
 	vector <double> predictValue;
+	//vector <int> vectorEPSint(vectorEPS.begin(), vectorEPS.end());
+
 	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
 		sumPredict = 0;
 		if (i == 0) 
 			predictValue.push_back(canal.at(i));
-		else if (i <= r)
+		else if (i < r)
 			predictValue.push_back(canal.at(i - 1));
 		else {
 			for (size_t j = 1; j <= r; j++)
@@ -321,7 +324,7 @@ double Wave::SystemOfEquations(vector<INT16>canal) {
 		vectorEPS.push_back(X[i]);
 
 	vector<double> counters;
-	counters = counterRepeat(canal, vectorEPS);
+	counters = predictCoder(canal, vectorEPS);
 	double returnEntropia = entro_minus(counters);
 
 	for (int i = 0; i < n; i++)
@@ -422,7 +425,7 @@ double Wave::EntroBit(vector<INT16>canal) {
 		for (int i = 0; i < r; i++)
 			descale.push_back(((scale.at(i) / (pow(2, b) - 1)) * (max)) * (si.at(i) * 2 - 1));
 
-		counters = counterRepeat(canal, descale);
+		counters = predictCoder(canal, descale);
 		Lsr = entro_minus(counters) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 
 		if (minLsr > Lsr) {
@@ -522,7 +525,7 @@ double Wave::divideEPS (vector<INT16>canal) {
 		for (int i = 0; i < r; i++) 
 			descale.push_back(((scale.at(i) / (pow(2, b) - 1)) * (max)) * (si.at(i) * 2 - 1));
 
-		counters = counterRepeat(canal, descale);
+		counters = predictCoder(canal, descale);
 		Lsr = entro_minus(counters) + ((32 + (r - 1) * (b + 1) + 10) / ammount_of_samples);
 
 		if (minLsr > Lsr)
@@ -608,7 +611,7 @@ void Wave::DecoderPredictive(vector<INT16>canal) {
 	delete[] B;
 	delete[] X;
 
-	vector <double> coderCanal = counterRepeat(canal, vectorEPS);
+	vector <double> coderCanal = predictCoder(canal, vectorEPS);
 	vector <double> decoderCanal;
 	double sumPredict = 0;
 	vector <double> predictValue;
@@ -617,7 +620,7 @@ void Wave::DecoderPredictive(vector<INT16>canal) {
 		sumPredict = 0;
 		if (i == 0)
 			predictValue.push_back(canal.at(i));
-		else if (i <= r)
+		else if (i < r)
 			predictValue.push_back(canal.at(i - 1));
 		else {
 			for (size_t j = 1; j <= r; j++)
@@ -640,4 +643,30 @@ void Wave::DecoderPredictive(vector<INT16>canal) {
 	for (int i = 0; i < 5; i++) 
 		cout << decoderCanal.at(i) << endl;
 
+}
+
+void Wave::Probability(vector<INT16>canal) {
+	
+	double p[5];
+	int N = ammount_of_samples / 2;
+
+	for (int i = 0; i < N; i++) {
+		if (canal.at(i) == -2)
+			p[0]++;
+		if (canal.at(i) == -1)
+			p[1]++;
+		if (canal.at(i) == 0)
+			p[2]++;
+		if (canal.at(i) == 1)
+			p[3]++;
+		if (canal.at(i) == 2)
+			p[4]++;
+	}
+
+
+	for (int i = 0; i < 5; i++) {
+		cout << p[i] << endl;
+		p[i] /= N;
+		cout << p[i] << endl;
+	}
 }
