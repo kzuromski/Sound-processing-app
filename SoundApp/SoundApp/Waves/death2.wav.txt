@@ -1,3 +1,0 @@
-.\Waves\death2.wav
-Liczba próbek z obu kana³ów: 1652752.000000
-Entropia ze wspó³czynnikiem 10.369792

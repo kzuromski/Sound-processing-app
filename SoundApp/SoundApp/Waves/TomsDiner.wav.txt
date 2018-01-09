@@ -1,3 +1,0 @@
-.\Waves\TomsDiner.wav
-Liczba próbek z obu kana³ów: 1751504.000000
-Entropia ze wspó³czynnikiem 9.995469

@@ -27,10 +27,10 @@ private:
 	DWORD size_of_data; // size of data chunk
 	const double eps = 1e-12; //wspolczynnik
 	INT16 data_of_file;
-	vector<INT16> left;
-	vector<double> left_minus;
-	vector<INT16> right;
-	vector<double> right_minus;
+	vector<INT16> leftCanal;
+	vector<double> leftDifferential;
+	vector<INT16> rightCanal;
+	vector<double> rightDifferential;
 	vector<double>minLsrVector;
 	ofstream new_file;
 	FILE *wf;
@@ -40,27 +40,33 @@ private:
 	double averageLsr;
 	int r;
 
+	vector<double>predictCoderLeft;
+	vector<double>predictCoderRight;
+
 public:
 	Wave(string name_of_wave, int r);
 	~Wave();
 	double getAverageEPS();
 	double getAverageBit();
 	double getAverageLsr();
-	void ReadData(); //czytanie danych
-	void normal_vectors(); // wypelnie wektorow danymi, parzyste do lewego, nieparzyste do prawego
-	void minus_vectors(); // wektory wypelniane obliczonymi danymi poprzez odjecie wartosci poprzedniego sampla od obecnego
-	double first_calculation(double a, vector<INT16> b); // obliczanie tej sumy
-	double first_calculation_minus(double a, vector<double> b); // funkcje x_minus to te same funkcje co wyzej tylko przymujace inny typ danych
-	double entro(vector<INT16> a); // obliczanie entropi
-	double entro_minus(vector<double> a); // Funkcja dokonuje rozk³adu LU macierzy A
-	bool ludist(int n, double ** A); // Funkcja wyznacza wektor X na podstawie A i B
-	bool lusolve(int n, double ** A, double * B, double * X);
+
+	void ReadData(); 
+	void NormalCanal(); 
+	void DifferentialCoder(); 
 	vector<double> predictCoder(vector<INT16>canal, vector<double>vectorEPS);
+
+	double Energy(double a, vector<INT16> b); 
+	double EnergyDifferential(double a, vector<double> b); 
+	double Entropy(vector<INT16> a); 
+	double EntropyDifferential(vector<double> a); 
+	bool ludist(int n, double ** A); 
+	bool lusolve(int n, double ** A, double * B, double * X);
+	
 	double SystemOfEquations(vector<INT16>canal);
 	bool sign(double a);
 	double EntroBit(vector<INT16>canal);
-	double divideEPS(vector<INT16>canal);
+	double DivideEPS(vector<INT16>canal);
 	void DecoderDifferential(vector<double>canal);
 	void DecoderPredictive(vector<INT16>canal);
-	void Probability(vector<INT16>canal);
+	void BothCanals();
 };

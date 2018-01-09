@@ -1,3 +1,0 @@
-.\Waves\ATrain.wav
-Liczba próbek z obu kana³ów: 1688532.000000
-Przeciêtna energia sygna³u: 984594.657346

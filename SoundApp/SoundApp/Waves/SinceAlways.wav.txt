@@ -1,3 +1,0 @@
-.\Waves\SinceAlways.wav
-Liczba próbek z obu kana³ów: 1604478.000000
-Entropia ze wspó³czynnikiem 12.528556

@@ -1,3 +1,0 @@
-.\Waves\thear1.wav
-Liczba próbek z obu kana³ów: 1703936.000000
-Entropia ze wspó³czynnikiem 12.182217
