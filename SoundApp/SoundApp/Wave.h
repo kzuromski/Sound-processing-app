@@ -68,5 +68,6 @@ public:
 	double DivideEPS(vector<INT16>canal);
 	void DecoderDifferential(vector<double>canal);
 	void DecoderPredictive(vector<INT16>canal);
+	vector<double>BothEPS(vector<INT16>canalDominant, vector<INT16>canalSecondary, int r1);
 	void BothCanals();
 };

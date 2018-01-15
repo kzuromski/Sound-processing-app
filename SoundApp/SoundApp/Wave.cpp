@@ -33,11 +33,13 @@ Wave::Wave(string name_of_wave, int r) {
 	//new_file << "Entropia ze wspó³czynnikiem " << averageEPS << endl;
 
 	//r<10;600>
-	//averageBit = (EntroBit(rightCanal) + EntroBit(leftCanal)) / 2;
+	averageBit = (EntroBit(rightCanal) + EntroBit(leftCanal)) / 2;
 	
-	/*for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 2; i++)
 		averageLsr += minLsrVector.at(i);
-	averageLsr /= 2;*/
+	averageLsr /= 2;
+
+	minLsrVector.clear();
 
 	//r<120;4>
 	//averageLsr = (DivideEPS(rightCanal) + DivideEPS(leftCanal)) / 2;
@@ -45,8 +47,8 @@ Wave::Wave(string name_of_wave, int r) {
 	//DecoderDifferential(leftDifferential);
 	//DecoderPredictive(leftCanal);
 
-	BothCanals();
-	averageLsr = (EntropyDifferential(predictCoderRight) + EntropyDifferential(predictCoderLeft)) / 2;
+	//BothCanals();
+	//averageLsr = (EntropyDifferential(predictCoderRight) + EntropyDifferential(predictCoderLeft)) / 2;
 }
 
 Wave::~Wave() {
@@ -133,7 +135,6 @@ vector<double> Wave::predictCoder(vector<INT16>canal, vector<double>vectorEPS) {
 			predictCoder.push_back(predictValue.at(i));
 		else
 			predictCoder.push_back(canal.at(i) - predictValue.at(i));
-
 	}
 
 	return predictCoder;
@@ -176,10 +177,10 @@ double Wave::Entropy(vector<INT16> a) {
 
 double Wave::EntropyDifferential(vector<double> a){
 	double Entropy = 0;
-	vector <double> buffor(262144, 0); //131072
+	vector <double> buffor(131072, 0); 
 	for (int i = 0; i < a.size(); i++)
-		buffor.at(a.at(i) + 131072)++; //65536
-	for (int i = 0; i < 262144; i++){ //131072
+		buffor.at(a.at(i) + 65536)++; 
+	for (int i = 0; i < 131072; i++){ 
 		if (buffor.at(i) != 0){
 			double p_i = (double)buffor.at(i) / a.size();
 			Entropy = Entropy + (p_i*log2(p_i));
@@ -486,6 +487,8 @@ double Wave::DivideEPS (vector<INT16>canal) {
 
 		si.clear();
 		scale.clear();
+		matrixX.clear();
+		matrixP.clear();
 		descale.clear();
 		vectorEPS.clear();
 		codingSamples.clear();
@@ -591,76 +594,7 @@ void Wave::DecoderPredictive(vector<INT16>canal) {
 	}
 }
 
-void Wave::BothCanals() {
-
-	int r1 = r * 0.5; // 0.5 <=> 0.67
-	int r2 = r * 0.5; // 0.5 <=> 0.34
-
-	//RIGHT---------------------------------------------------------------------------
-
-	double **A1, *B1, *X1;
-	int n1 = r;
-
-	cout << setprecision(5) << fixed;
-	A1 = new double *[n1];
-	B1 = new double[n1];
-	X1 = new double[n1];
-
-	for (int i = 0; i < n1; i++)
-		A1[i] = new double[n1];
-
-	int N1 = ammount_of_samples / 2;
-	double sumX1 = 0;
-	double sumP1 = 0;
-	vector<double>matrixXfirst;
-	vector<double>matrixPfirst;
-	vector<double> vectorEPSfirst;
-
-	for (int i = 1; i <= r; i++) {
-		for (int j = 1; j <= r; j++) {
-			for (int z = r; z < N1; z++) {
-				if(i > r1 && j > r1)
-					sumX1 += leftCanal.at(z - i + r1) * leftCanal.at(z - j + r1);
-				else if (i > r1)
-					sumX1 += leftCanal.at(z - i + r1) * rightCanal.at(z - j);
-				else if (j > r1) 
-					sumX1 += rightCanal.at(z - i) * leftCanal.at(z - j + r1);
-				else
-					sumX1 += rightCanal.at(z - i) * rightCanal.at(z - j);
-				sumP1 += rightCanal.at(z) * rightCanal.at(z - i);
-			}
-
-			if (j == 1)
-				matrixPfirst.push_back(sumP1);
-			matrixXfirst.push_back(sumX1);
-			sumX1 = 0;
-			sumP1 = 0;
-		}
-	}
-
-	int counterVector1 = 0;
-	for (int i = 0; i < n1; i++) {
-		for (int j = 0; j < n1; j++) {
-			A1[i][j] = matrixXfirst.at(counterVector1);
-			counterVector1++;
-			B1[i] = matrixPfirst.at(i);
-		}
-	}
-
-	if (ludist(n1, A1) && lusolve(n1, A1, B1, X1)) {}
-	else cout << "DZIELNIK ZERO\n";
-
-	for (int i = 0; i < r; i++)
-		vectorEPSfirst.push_back(X1[i]);
-
-	for (int i = 0; i < n1; i++)
-		delete[] A1[i];
-	delete[] A1;
-	delete[] B1;
-	delete[] X1;
-
-	//LEFT---------------------------------------------------------------------------
-
+vector<double> Wave::BothEPS(vector<INT16>canalDominant, vector<INT16>canalSecondary, int r1) {
 	double **A, *B, *X;
 	int n = r;
 
@@ -675,27 +609,31 @@ void Wave::BothCanals() {
 	int N = ammount_of_samples / 2;
 	double sumX = 0;
 	double sumP = 0;
-	vector<double>matrixXsecond;
-	vector<double>matrixPseconds;
-	vector<double>vectorEPSsecond;
+	vector<double>matrixX;
+	vector<double>matrixP;
+	vector<double>vectorEPS;
 
 	for (int i = 1; i <= r; i++) {
 		for (int j = 1; j <= r; j++) {
 			for (int z = r; z < N; z++) {
-				if (i > r2 && j > r2)
-					sumX1 += leftCanal.at(z - i + r2 - 1) * leftCanal.at(z - j + r2 - 1);
-				else if (i > r2) 
-					sumX += leftCanal.at(z - i + r2 - 1) * rightCanal.at(z - j);
-				else if (j > r2) 
-					sumX += rightCanal.at(z - i) * leftCanal.at(z - j + r2 - 1);
+				if (i > r1 && j > r1)
+					sumX += canalSecondary.at(z - i + r1) * canalSecondary.at(z - j + r1);
+				else if (i > r1)
+					sumX += canalSecondary.at(z - i + r1) * canalDominant.at(z - j);
+				else if (j > r1)
+					sumX += canalDominant.at(z - i) * canalSecondary.at(z - j + r1);
 				else
-					sumX += rightCanal.at(z - i) * rightCanal.at(z - j);
-				sumP += rightCanal.at(z) * rightCanal.at(z - i);
+					sumX += canalDominant.at(z - i) * canalDominant.at(z - j);
+
+				if (i > r1)
+					sumP += canalDominant.at(z) * canalSecondary.at(z - i + r1);
+				else
+					sumP += canalDominant.at(z) * canalDominant.at(z - i);
 			}
 
 			if (j == 1)
-				matrixPseconds.push_back(sumP);
-			matrixXsecond.push_back(sumX);
+				matrixP.push_back(sumP);
+			matrixX.push_back(sumX);
 			sumX = 0;
 			sumP = 0;
 		}
@@ -704,9 +642,9 @@ void Wave::BothCanals() {
 	int counterVector = 0;
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
-			A[i][j] = matrixXsecond.at(counterVector);
+			A[i][j] = matrixX.at(counterVector);
 			counterVector++;
-			B[i] = matrixPseconds.at(i);
+			B[i] = matrixP.at(i);
 		}
 	}
 
@@ -714,144 +652,83 @@ void Wave::BothCanals() {
 	else cout << "DZIELNIK ZERO\n";
 
 	for (int i = 0; i < r; i++)
-		vectorEPSsecond.push_back(X[i]);
+		vectorEPS.push_back(X[i]);
 
 	for (int i = 0; i < n; i++)
 		delete[] A[i];
 	delete[] A;
 	delete[] B;
 	delete[] X;
+
+	return vectorEPS;
+}
+
+void Wave::BothCanals() {
+
+	int r1 = r / 2; // r / 3;
+	int r2 = r / 2; // r / 3 * 2;
 	
-	//RIGHT-------------------------------------------------------------------------- -
+	vector <double> A1 = BothEPS(rightCanal, leftCanal, r1);		
+	vector <double> A2 = BothEPS(leftCanal, rightCanal, r1 + 1);
 
-	double sumPredict1 = 0;
-	vector <double> predictCoderRightfirst;
-	vector <double> predictValueRightfirst;
+	//RIGHT--------------------------------------------------------------------------
+	double sumPredictRight = 0;
+	vector <double> predictValueRight;
 	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
-		sumPredict1 = 0;
+		sumPredictRight = 0;
 		if (i == 0)
-			predictValueRightfirst.push_back(rightCanal.at(i));
+			predictValueRight.push_back(rightCanal.at(i)); 
 		else if (i < r)
-			predictValueRightfirst.push_back(rightCanal.at(i) - rightCanal.at(i - 1));
+			predictValueRight.push_back(rightCanal.at(i) - rightCanal.at(i - 1)); 
 		else {
-			for (size_t j = 1; j <= r1; j++)
-				sumPredict1 += vectorEPSfirst.at(j - 1) * rightCanal.at(i - j);
-			if (sumPredict1 > 32768 - 1)
-				sumPredict1 = 32768 - 1;
-			else if (sumPredict1 < -32768)
-				sumPredict1 = -32768;
-			predictValueRightfirst.push_back(floor(sumPredict1 + 0.5));
-		}
-	}
-
-	for (int i = 0; i < ammount_of_samples / 2; i++) {
-		if (i < r)
-			predictCoderRightfirst.push_back(predictValueRightfirst.at(i));
-		else
-			predictCoderRightfirst.push_back(rightCanal.at(i) - predictValueRightfirst.at(i));
-
-	}
-
-	//RIGHT-------------------------------------------------------------------------- -
-
-	double sumPredict2 = 0;
-	vector <double> predictCoderRightsecond;
-	vector <double> predictValueRightsecond;
-	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
-		sumPredict2 = 0;
-		if (i == 0)
-			predictValueRightsecond.push_back(rightCanal.at(i));
-		else if (i < r)
-			predictValueRightsecond.push_back(rightCanal.at(i) - rightCanal.at(i - 1));
-		else {
-			for (size_t j = 0; j <= r2 - 1; j++)
-			sumPredict2 += vectorEPSsecond.at(j) * rightCanal.at(i - j);
-			if (sumPredict2 > 32768 - 1)
-				sumPredict2 = 32768 - 1;
-			else if (sumPredict2 < -32768)
-				sumPredict2 = -32768;
-			predictValueRightsecond.push_back(floor(sumPredict2 + 0.5));
-		}
-	}
-
-	for (int i = 0; i < ammount_of_samples / 2; i++) {
-		if (i < r)
-			predictCoderRightsecond.push_back(predictValueRightsecond.at(i));
-		else
-			predictCoderRightsecond.push_back(rightCanal.at(i) - predictValueRightsecond.at(i));
-
-	}
-
-	//LEFT---------------------------------------------------------------------------
-
-	double sumPredict = 0;
-	vector <double> predictCoderLeftfirst;
-	vector <double> predictValueLeftfirst;
-	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
-		sumPredict = 0;
-		if (i == 0)
-			predictValueLeftfirst.push_back(leftCanal.at(i));
-		else if (i < r)
-			predictValueLeftfirst.push_back(leftCanal.at(i) - leftCanal.at(i - 1));
-		else {
+			for (size_t j = 1; j <= r1; j++) 
+				sumPredictRight += A1.at(j - 1) * rightCanal.at(i - j);
 			for (size_t j = 1; j <= r2; j++)
-				sumPredict += vectorEPSsecond.at(j - 1) * leftCanal.at(i - j);
-			if (sumPredict > 32768 - 1)
-				sumPredict = 32768 - 1;
-			else if (sumPredict < -32768)
-				sumPredict = -32768;
-			predictValueLeftfirst.push_back(floor(sumPredict + 0.5));
-		}
-	}
-
-	for (int i = 0; i < ammount_of_samples / 2; i++) {
-		if (i < r)
-			predictCoderLeftfirst.push_back(predictValueLeftfirst.at(i));
-		else
-			predictCoderLeftfirst.push_back(leftCanal.at(i) - predictValueLeftfirst.at(i));
-
-	}
-
-	//LEFT---------------------------------------------------------------------------
-
-	double sumPredict3 = 0;
-	vector <double> predictCoderLeftsecond;
-	vector <double> predictValueLeftsecond;
-	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
-		sumPredict3 = 0;
-		if (i == 0)
-			predictValueLeftsecond.push_back(leftCanal.at(i));
-		else if (i < r)
-			predictValueLeftsecond.push_back(leftCanal.at(i) - leftCanal.at(i - 1));
-		else {
-			for (size_t j = 1; j <= r1; j++)
-				sumPredict3 += vectorEPSfirst.at(j - 1) * leftCanal.at(i - j);
-			if (sumPredict3 > 32768 - 1)
-				sumPredict3 = 32768 - 1;
-			else if (sumPredict3 < -32768)
-				sumPredict3 = -32768;
-			predictValueLeftsecond.push_back(floor(sumPredict3 + 0.5));
-		}
-	}
-
-	for (int i = 0; i < ammount_of_samples / 2; i++) {
-		if (i < r)
-			predictCoderLeftsecond.push_back(predictValueLeftsecond.at(i));
-		else
-			predictCoderLeftsecond.push_back(leftCanal.at(i) - predictValueLeftsecond.at(i));
-
-	}
+				sumPredictRight += A1.at(j - 1 + r1) * leftCanal.at(i - j); 
 	
-	//double sum = 0;
-	//for (int i = 0; i < 6; i++) {
-	//	cout << vectorEPSfirst.at(i) << endl;
-	//	cout << vectorEPSsecond.at(i) << endl;
-	//	sum += vectorEPSsecond.at(i);
-	//}
-	//cout << sum << endl << endl;
+			if (sumPredictRight > 32768 - 1)
+				sumPredictRight = 32768 - 1;
+			else if (sumPredictRight < -32768)
+				sumPredictRight = -32768;
+			predictValueRight.push_back(floor(sumPredictRight + 0.5));
+		}
+	}
 
 	for (int i = 0; i < ammount_of_samples / 2; i++) {
-		predictCoderLeft.push_back(predictCoderRightfirst.at(i) + predictCoderLeftfirst.at(i));
-		predictCoderRight.push_back(predictCoderLeftsecond.at(i) + predictCoderRightsecond.at(i));
+		if (i < r)
+			predictCoderRight.push_back(predictValueRight.at(i));
+		else
+			predictCoderRight.push_back(rightCanal.at(i) - predictValueRight.at(i));
 	}
+
+	//LEFT--------------------------------------------------------------------------
+	double sumPredictLeft = 0;
+	vector <double> predictValueLeft;
+	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
+		sumPredictLeft = 0;
+		if (i == 0)
+			predictValueLeft.push_back(leftCanal.at(i));
+		else if (i < r)
+			predictValueLeft.push_back(leftCanal.at(i) - leftCanal.at(i - 1));
+		else {
+			for (size_t j = 1; j <= r1; j++) 
+				sumPredictLeft += A2.at(j - 1) * leftCanal.at(i - j);
+			for (size_t j = 0; j <= r2 - 1; j++) 
+				sumPredictLeft += A2.at(j + r1) * rightCanal.at(i - j); 
+
+			if (sumPredictLeft > 32768 - 1)
+				sumPredictLeft = 32768 - 1;
+			else if (sumPredictLeft < -32768)
+				sumPredictLeft = -32768;
+			predictValueLeft.push_back(floor(sumPredictLeft + 0.5));
+		}
+	}
+
+	for (int i = 0; i < ammount_of_samples / 2; i++) {
+		if (i < r)
+			predictCoderLeft.push_back(predictValueLeft.at(i));
+		else
+			predictCoderLeft.push_back(leftCanal.at(i) - predictValueLeft.at(i));
+	}
+
 }

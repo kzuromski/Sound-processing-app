@@ -21,39 +21,39 @@ void start(int r) {
 	double tab[32];
 	double average = 0;
 
-	tab[0] = wave1.getAverageLsr();
-	tab[1] = wave2.getAverageLsr();
-	tab[2] = wave3.getAverageLsr();
-	tab[3] = wave4.getAverageLsr();
-	tab[4] = wave5.getAverageLsr();
-	tab[5] = wave6.getAverageLsr();
-	tab[6] = wave7.getAverageLsr();
-	tab[7] = wave8.getAverageLsr();
-	tab[8] = wave9.getAverageLsr();
-	tab[9] = wave10.getAverageLsr();
-	tab[10] = wave11.getAverageLsr();
-	tab[11] = wave12.getAverageLsr();
-	tab[12] = wave13.getAverageLsr();
-	tab[13] = wave14.getAverageLsr();
-	tab[14] = wave15.getAverageLsr();
-	tab[15] = wave16.getAverageLsr();
+	tab[0] = wave1.getAverageBit();
+	tab[1] = wave2.getAverageBit();
+	tab[2] = wave3.getAverageBit();
+	tab[3] = wave4.getAverageBit();
+	tab[4] = wave5.getAverageBit();
+	tab[5] = wave6.getAverageBit();
+	tab[6] = wave7.getAverageBit();
+	tab[7] = wave8.getAverageBit();
+	tab[8] = wave9.getAverageBit();
+	tab[9] = wave10.getAverageBit();
+	tab[10] = wave11.getAverageBit();
+	tab[11] = wave12.getAverageBit();
+	tab[12] = wave13.getAverageBit();
+	tab[13] = wave14.getAverageBit();
+	tab[14] = wave15.getAverageBit();
+	tab[15] = wave16.getAverageBit();
 
-	tab[16] = wave1.getAverageEPS();
-	tab[17] = wave2.getAverageEPS();
-	tab[18] = wave3.getAverageEPS();
-	tab[19] = wave4.getAverageEPS();
-	tab[20] = wave5.getAverageEPS();
-	tab[21] = wave6.getAverageEPS();
-	tab[22] = wave7.getAverageEPS();
-	tab[23] = wave8.getAverageEPS();
-	tab[24] = wave9.getAverageEPS();
-	tab[25] = wave10.getAverageEPS();
-	tab[26] = wave11.getAverageEPS();
-	tab[27] = wave12.getAverageEPS();
-	tab[28] = wave13.getAverageEPS();
-	tab[29] = wave14.getAverageEPS();
-	tab[30] = wave15.getAverageEPS();
-	tab[31] = wave16.getAverageEPS();
+	tab[16] = wave1.getAverageLsr();
+	tab[17] = wave2.getAverageLsr();
+	tab[18] = wave3.getAverageLsr();
+	tab[19] = wave4.getAverageLsr();
+	tab[20] = wave5.getAverageLsr();
+	tab[21] = wave6.getAverageLsr();
+	tab[22] = wave7.getAverageLsr();
+	tab[23] = wave8.getAverageLsr();
+	tab[24] = wave9.getAverageLsr();
+	tab[25] = wave10.getAverageLsr();
+	tab[26] = wave11.getAverageLsr();
+	tab[27] = wave12.getAverageLsr();
+	tab[28] = wave13.getAverageLsr();
+	tab[29] = wave14.getAverageLsr();
+	tab[30] = wave15.getAverageLsr();
+	tab[31] = wave16.getAverageLsr();
 
 	for (int i = 0; i < 16; i++)
 		average += tab[i];
@@ -70,12 +70,10 @@ void start(int r) {
 
 void main() {
 
-	for (int r = 36; r <= 120; r += 6) {
+	for (int r = 10; r <= 600; r += 10) {
 		cout << "r = " << r << endl;
 		start(r);
 	}
-
-	//Wave wave1("experiencia.wav", 6);
 
 	//start(3);
 	//start(4);
