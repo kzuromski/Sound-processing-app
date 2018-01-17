@@ -70,10 +70,12 @@ void start(int r) {
 
 void main() {
 
-	for (int r = 10; r <= 600; r += 10) {
+	for (int r = 66; r <= 120; r += 6) {
 		cout << "r = " << r << endl;
 		start(r);
 	}
+
+	//Wave wave1("ATrain.wav", 6);
 
 	//start(3);
 	//start(4);

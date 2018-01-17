@@ -33,13 +33,11 @@ Wave::Wave(string name_of_wave, int r) {
 	//new_file << "Entropia ze wspó³czynnikiem " << averageEPS << endl;
 
 	//r<10;600>
-	averageBit = (EntroBit(rightCanal) + EntroBit(leftCanal)) / 2;
+	/*averageBit = (EntroBit(rightCanal) + EntroBit(leftCanal)) / 2;
 	
 	for (int i = 0; i < 2; i++)
 		averageLsr += minLsrVector.at(i);
-	averageLsr /= 2;
-
-	minLsrVector.clear();
+	averageLsr /= 2;*/
 
 	//r<120;4>
 	//averageLsr = (DivideEPS(rightCanal) + DivideEPS(leftCanal)) / 2;
@@ -47,8 +45,8 @@ Wave::Wave(string name_of_wave, int r) {
 	//DecoderDifferential(leftDifferential);
 	//DecoderPredictive(leftCanal);
 
-	//BothCanals();
-	//averageLsr = (EntropyDifferential(predictCoderRight) + EntropyDifferential(predictCoderLeft)) / 2;
+	BothCanals();
+	averageLsr = (EntropyDifferential(predictCoderRight) + EntropyDifferential(predictCoderLeft)) / 2;
 }
 
 Wave::~Wave() {
@@ -665,13 +663,12 @@ vector<double> Wave::BothEPS(vector<INT16>canalDominant, vector<INT16>canalSecon
 
 void Wave::BothCanals() {
 
-	int r1 = r / 2; // r / 3;
-	int r2 = r / 2; // r / 3 * 2;
+	int r1 = r / 2; // r / 3 * 2;
+	int r2 = r / 2; // r / 3;
 	
-	vector <double> A1 = BothEPS(rightCanal, leftCanal, r1);		
-	vector <double> A2 = BothEPS(leftCanal, rightCanal, r1 + 1);
+	////RIGHT--------------------------------------------------------------------------
+	vector <double> A1 = BothEPS(rightCanal, leftCanal, r1);
 
-	//RIGHT--------------------------------------------------------------------------
 	double sumPredictRight = 0;
 	vector <double> predictValueRight;
 	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
@@ -702,6 +699,8 @@ void Wave::BothCanals() {
 	}
 
 	//LEFT--------------------------------------------------------------------------
+	vector <double> A2 = BothEPS(leftCanal, rightCanal, r1 + 1);
+
 	double sumPredictLeft = 0;
 	vector <double> predictValueLeft;
 	for (size_t i = 0; i < ammount_of_samples / 2; i++) {
@@ -714,7 +713,7 @@ void Wave::BothCanals() {
 			for (size_t j = 1; j <= r1; j++) 
 				sumPredictLeft += A2.at(j - 1) * leftCanal.at(i - j);
 			for (size_t j = 0; j <= r2 - 1; j++) 
-				sumPredictLeft += A2.at(j + r1) * rightCanal.at(i - j); 
+				sumPredictLeft += A2.at(j + r1) * rightCanal.at(i - j);
 
 			if (sumPredictLeft > 32768 - 1)
 				sumPredictLeft = 32768 - 1;
