@@ -70,7 +70,7 @@ void start(int r) {
 
 void main() {
 
-	for (int r = 66; r <= 120; r += 6) {
+	for (int r = 120; r <= 120; r += 6) {
 		cout << "r = " << r << endl;
 		start(r);
 	}

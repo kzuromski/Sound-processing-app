@@ -665,7 +665,7 @@ void Wave::BothCanals() {
 
 	int r1 = r / 2; // r / 3 * 2;
 	int r2 = r / 2; // r / 3;
-	
+
 	////RIGHT--------------------------------------------------------------------------
 	vector <double> A1 = BothEPS(rightCanal, leftCanal, r1);
 
@@ -699,7 +699,7 @@ void Wave::BothCanals() {
 	}
 
 	//LEFT--------------------------------------------------------------------------
-	vector <double> A2 = BothEPS(leftCanal, rightCanal, r1 + 1);
+	vector <double> A2 = BothEPS(leftCanal, rightCanal, r1 /*+ 1*/);
 
 	double sumPredictLeft = 0;
 	vector <double> predictValueLeft;
@@ -712,8 +712,8 @@ void Wave::BothCanals() {
 		else {
 			for (size_t j = 1; j <= r1; j++) 
 				sumPredictLeft += A2.at(j - 1) * leftCanal.at(i - j);
-			for (size_t j = 0; j <= r2 - 1; j++) 
-				sumPredictLeft += A2.at(j + r1) * rightCanal.at(i - j);
+			for (size_t j = 1; j <= r2 /*- 1*/; j++) 
+				sumPredictLeft += A2.at(j - 1 + r1) * rightCanal.at(i - j);
 
 			if (sumPredictLeft > 32768 - 1)
 				sumPredictLeft = 32768 - 1;
